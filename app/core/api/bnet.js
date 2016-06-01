@@ -115,6 +115,7 @@ module.exports.requestBnetApi = function (region, endUrl, callback) {
 module.exports.request = function (url, callback) {
     var logger = applicationStorage.logger;
     logger.verbose('GET BNET API : %s', url);
+
     request.get({method: "GET", uri: url, gzip: true}, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             callback(null, JSON.parse(body));
