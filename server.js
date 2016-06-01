@@ -38,6 +38,16 @@ if (process.argv.indexOf("-au") != -1) {
     processNames.push("AuctionUpdateProcess");
 }
 
+// -gu start GuildUpdateProcess
+if (process.argv.indexOf("-gu") != -1) {
+    processNames.push("GuildUpdateProcess");
+}
+
+// -cu start CharacterUpdateProcess
+if (process.argv.indexOf("-cu") != -1) {
+    processNames.push("CharacterUpdateProcess");
+}
+
 
 //Load config file
 var env = process.env.NODE_ENV || "development";

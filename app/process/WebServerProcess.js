@@ -9,7 +9,6 @@ var bodyParser = require("body-parser");
 var compression = require('compression');
 var applicationStorage = process.require('core/applicationStorage.js');
 
-var config = applicationStorage.config;
 var logger = applicationStorage.logger;
 
 
@@ -39,14 +38,7 @@ function WebServerProcess(port) {
     });
 
     //Initialize api v1 routes
-    //this.app.use('/api/v1', process.require("characters/routes.js"));
-
-
-    //Catch all error and log them
-    this.app.use(function (error, req, res) {
-        logger.error("Error on request", error);
-        res.status(error.statusCode).json({error: error.statusCode, message: "Internal Server Error"});
-    });
+    this.app.use('/api/v1', process.require("updates/routes.js"));
 
     //Log all other request and send 404
     this.app.use(function (req, res) {
