@@ -1,6 +1,6 @@
 {
   "bnet": {
-    "clientID": "your clientID",
+    "clientID": "your clientID"
   },
   "database": {
     "mongo": "mongodb://localhost/warcraft-progres",
