@@ -1,8 +1,12 @@
 TODO
 
-1 Auctionfeeder
-1 crawler character
+1 Auctionfeeder --> OK
 
-1 base de kills
+1 crawler character qui update le la base de kills
+1 crawler de GU qui put des char à update
 
-1 Guild Progress Updater
+1 base de kills par palier
+
+1 Progress Updater qui set le progress d'une guilde pour le palier
+
+1 truc qui delete les guildes en 404.

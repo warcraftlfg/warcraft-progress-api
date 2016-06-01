@@ -41,7 +41,7 @@ AuctionUpdateProcess.prototype.updateAuction = function () {
         function (auctionUpdate, callback) {
             //Check if max request is reach - AuctionUpdateProcess take 1 request to Bnet
             limitModel.increment("bnet", function (error, value) {
-                if (value > applicationStorage.config.oauth.bnet.limit) {
+                if (value > applicationStorage.config.bnet.limit) {
                     logger.info("Bnet Api limit reach ... waiting 1 min");
                     updateModel.insert("wp_au", auctionUpdate.region, auctionUpdate.realm, auctionUpdate.name, auctionUpdate.priority, function () {
                         setTimeout(function () {
@@ -110,17 +110,17 @@ AuctionUpdateProcess.prototype.feedAuctions = function () {
             //Look if characterUpdates, guildUpdates & auctionUpdates are empty
             async.parallel({
                 characterUpdatesCount: function (callback) {
-                    updateModel.getCount("cu", 0, function (error, count) {
+                    updateModel.getCount("wp_cu", 0, function (error, count) {
                         callback(error, count);
                     });
                 },
                 guildUpdatesCount: function (callback) {
-                    updateModel.getCount("gu", 0, function (error, count) {
+                    updateModel.getCount("wp_gu", 0, function (error, count) {
                         callback(error, count);
                     });
                 },
                 auctionUpdatesCount: function (callback) {
-                    updateModel.getCount("au", 0, function (error, count) {
+                    updateModel.getCount("wp_au", 0, function (error, count) {
                         callback(error, count);
                     });
                 }
@@ -156,7 +156,7 @@ AuctionUpdateProcess.prototype.importAuctionOwners = function (callback) {
     var self = this;
     async.waterfall([
         function (callback) {
-            updateService.getNextUpdate('aru', function (error, auctionRealmUpdate) {
+            updateService.getNextUpdate('wp_aru', function (error, auctionRealmUpdate) {
                 callback(error, auctionRealmUpdate);
             });
         },
