@@ -21,4 +21,23 @@ module.exports.upsert = function (tier, region, realm, name, score, callback) {
         callback(error);
     });
 
-}
+};
+
+
+/**
+ * Insert an update into list
+ * @param tier
+ * @param region
+ * @param realm
+ * @param name
+ * @param callback
+ */
+module.exports.getRank = function (tier, region, realm, name, callback) {
+    var redis = applicationStorage.redis;
+
+    //Create or update auctionUpdate
+    redis.zrank("tier_"+tier, region+"-"+realm+"-"+name, function (error,rank) {
+        callback(error,rank);
+    });
+
+};

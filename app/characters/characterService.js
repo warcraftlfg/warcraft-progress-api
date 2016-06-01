@@ -45,8 +45,7 @@ module.exports.parseProgress = function (region, character, callback) {
                 var difficulties = ["normal", "heroic", "mythic"];
                 async.forEachSeries(difficulties, function (difficulty, callback) {
 
-                    //TODO Don't add when boss[difficulty+"Timestamp"]+(2*1000*3600*24*7)< Now() (2 weeks)
-                    if (boss[difficulty + 'Timestamp'] == 0) {
+                    if (boss[difficulty + 'Timestamp'] == 0 || boss[difficulty+"Timestamp"]+(1000*3600*24*14) < new Date().getTime() ) {
                         return callback();
                     }
 

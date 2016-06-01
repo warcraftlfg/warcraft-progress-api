@@ -101,20 +101,26 @@ GuildProgressUpdateProcess.prototype.updateGuildProgress = function () {
 
                                     if (progress.bestKillTimestamp) {
 
-
+                                        progress.updated = new Date().getTime();
+                                        obj["tier_" + raid.tier] = progress;
                                         //Calculate the score for redis bestTimestamp - 2Years * score
+                                        var score = progress.bestKillTimestamp - (2 * 1000 * 3600 * 24 * 365 * progress.score);
                                         async.parallel([
                                             function (callback) {
-                                                progress.updated = new Date().getTime();
-                                                obj["tier_" + raid.tier] = progress;
+
                                                 guildModel.upsert(guildProgress.region, guildProgress.realm, guildProgress.name, {progress: obj}, function (error) {
                                                     logger.verbose("Update Progress for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
                                                     callback(error);
                                                 });
                                             },
                                             function (callback) {
-                                                var score = progress.bestKillTimestamp - (2 * 1000 * 3600 * 24 * 365 * progress.score);
                                                 rankModel.upsert(raid.tier, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                    callback(error);
+                                                });
+                                            }
+                                            ,
+                                            function (callback) {
+                                                rankModel.upsert(raid.tier+"_"+guildProgress.region, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
                                                     callback(error);
                                                 });
                                             }
