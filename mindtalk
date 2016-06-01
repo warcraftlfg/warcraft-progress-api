@@ -1,12 +1,21 @@
 TODO
-
-1 Auctionfeeder --> OK
-
-1 crawler character qui update le la base de kills -> OK
-1 crawler de GU qui put des char à update -> OK
-
-1 base de kills par palier -> OK
-
-1 Progress Updater qui set le progress d'une guilde pour le palier
-
 1 truc qui delete les guildes en 404.
+
+Redis je fais une list avec poid le poid le plus petit est le mieux placer.
+
+tier_18
+tier_18_tw
+tier_18_eu
+tier_18_us
+tier_18_kr
+
+Le poid le plus petit se calcul de la façon suivante
+
+timestamp - poid du boss
+
+
+Kill T0
+T0 -
+
+
+

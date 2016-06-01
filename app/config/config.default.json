@@ -30,6 +30,7 @@
     "raids": [
       {
         "name": "Hellfire Citadel",
+        "tier": 18,
         "bosses": [
           {
             "name": "Hellfire Assault"

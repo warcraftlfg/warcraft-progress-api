@@ -48,6 +48,11 @@ if (process.argv.indexOf("-cu") != -1) {
     processNames.push("CharacterUpdateProcess");
 }
 
+// -gpu start GuildProgressUpdateProcess
+if (process.argv.indexOf("-gpu") != -1) {
+    processNames.push("GuildProgressUpdateProcess");
+}
+
 
 //Load config file
 var env = process.env.NODE_ENV || "development";

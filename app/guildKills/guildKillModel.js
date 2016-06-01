@@ -15,7 +15,7 @@ var applicationStorage = process.require("core/applicationStorage.js");
  * @param source
  * @param callback
  */
-module.exports.upsert = function (region, realm, name, raid, boss, difficulty, timestamp, source, raider, callback) {
+module.exports.upsert = function (region, realm, name, tier, boss, difficulty, timestamp, source, raider, callback) {
 
     region = region.toLowerCase();
     //Upsert
@@ -30,7 +30,7 @@ module.exports.upsert = function (region, realm, name, raid, boss, difficulty, t
         updated: new Date().getTime()
     };
 
-    var collection = applicationStorage.mongo.collection(raid);
+    var collection = applicationStorage.mongo.collection("tier_"+tier);
     async.series([
         function (callback) {
             collection.updateOne({
@@ -79,19 +79,13 @@ module.exports.upsert = function (region, realm, name, raid, boss, difficulty, t
  * @param raid
  * @param callback
  */
-module.exports.computeProgress = function (region, realm, name, raid, callback) {
+module.exports.computeProgress = function (region, realm, name, tier, callback) {
 
     async.waterfall([
         function (callback) {
             //Format value
             region = region.toLowerCase();
             callback();
-        },
-        function (callback) {
-            //Validate Params
-            validator.validate({region: region, realm: realm, name: name, raid: raid}, function (error) {
-                callback(error);
-            });
         },
         function (callback) {
             //Upsert
@@ -159,7 +153,7 @@ module.exports.computeProgress = function (region, realm, name, raid, callback) 
                 return value;
             };
 
-            var collection = applicationStorage.mongo.collection(raid);
+            var collection = applicationStorage.mongo.collection("tier_"+tier);
             collection.mapReduce(map, reduce, {
                 out: {inline: 1},
                 finalize: finalize,

@@ -1,0 +1,24 @@
+"use strict";
+
+//Load dependencies
+var async = require("async");
+var applicationStorage = process.require("core/applicationStorage");
+
+/**
+ * Insert an update into list
+ * @param tier
+ * @param region
+ * @param realm
+ * @param name
+ * @param score
+ * @param callback
+ */
+module.exports.upsert = function (tier, region, realm, name, score, callback) {
+    var redis = applicationStorage.redis;
+
+    //Create or update auctionUpdate
+    redis.zadd("tier_"+tier, score, region+"-"+realm+"-"+name, function (error) {
+        callback(error);
+    });
+
+}

@@ -27,10 +27,10 @@ AuctionUpdateProcess.prototype.updateAuction = function () {
             updateService.getNextUpdate('wp_au', function (error, auctionUpdate) {
                 if (auctionUpdate == null) {
                     //Guild update is empty
-                    logger.info("No auction to update ... waiting 3 sec");
+                    logger.info("No auction to update ... waiting 1 min");
                     setTimeout(function () {
                         callback(true);
-                    }, 3000);
+                    }, 60000);
                 } else {
                     logger.info("Update with auction owner %s-%s-%s", auctionUpdate.region, auctionUpdate.realm, auctionUpdate.name);
                     callback(error, auctionUpdate);
