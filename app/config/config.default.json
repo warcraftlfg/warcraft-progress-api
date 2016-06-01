@@ -1,0 +1,23 @@
+{
+  "bnet": {
+    "clientID": "your clientID",
+    "clientSecret": "your clientSecret",
+    "callbackURL": "https://localhost:3000/auth/bnet/callback",
+    "limit": 35000
+  },
+  "database": {
+    "mongo": "mongodb://localhost/warcraft-progres",
+    "redis": "redis://localhost"
+  },
+  "logger": {
+    "folder": "logs",
+    "level": "debug"
+  },
+  "bnetRegions": [
+    "eu",
+    "kr",
+    "tw",
+    "us"
+  ]
+
+}

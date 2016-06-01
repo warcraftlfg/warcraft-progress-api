@@ -1,0 +1,22 @@
+{
+  "name": "warcraft-progress-api",
+  "description": "A guild progress api for World of Warcraft",
+  "private": true,
+  "main": "server.js",
+  "dependencies": {
+    "async": "*",
+    "body-parser": "*",
+    "compression": "*",
+    "express": "*",
+    "mongodb": "*",
+    "redis": "*",
+    "request": "*",
+    "winston": "*",
+    "winston-daily-rotate-file": "^1.0.1"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "The WarcraftLFG Team <warcraftlfg@gmail.com>",
+  "license": "AGPL-3.0"
+}
