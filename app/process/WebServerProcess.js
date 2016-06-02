@@ -39,7 +39,9 @@ function WebServerProcess(port) {
 
     //Initialize api v1 routes
     this.app.use('/api/v1', process.require("updates/routes.js"));
-    this.app.use('/api/v1', process.require("ranks/routes.js"));
+    this.app.use('/api/v1', process.require("ranks/routes.js"))
+    this.app.use('/api/v1', process.require("guilds/routes.js"));
+
 
 
     //Log all other request and send 404
