@@ -3,7 +3,7 @@
     "clientID": "your clientID"
   },
   "database": {
-    "mongo": "mongodb://localhost/warcraft-progres",
+    "mongo": "mongodb://localhost/warcraft-progress",
     "redis": "redis://localhost"
   },
   "logger": {
