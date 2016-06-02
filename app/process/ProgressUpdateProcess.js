@@ -49,7 +49,6 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                             },
                             function (result, callback) {
                                 var progress = {};
-                                progress.score = 0;
                                 var bestNormalKillTimestamp = 0;
                                 var bestHeroicKillTimestamp = 0;
                                 var bestMythicKillTimestamp = 0;
@@ -74,17 +73,14 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                             if (obj.value.timestamps[0][0] > bestNormalKillTimestamp) {
                                                 bestNormalKillTimestamp = obj.value.timestamps[0][0];
                                             }
-                                            progress.score += 1;
                                         } else if (obj._id.difficulty == "heroic") {
                                             if (obj.value.timestamps[0][0] > bestHeroicKillTimestamp) {
                                                 bestHeroicKillTimestamp = obj.value.timestamps[0][0];
                                             }
-                                            progress.score += 100;
                                         } else {
                                             if (obj.value.timestamps[0][0] > bestMythicKillTimestamp) {
                                                 bestMythicKillTimestamp = obj.value.timestamps[0][0];
                                             }
-                                            progress.score += 10000;
                                         }
                                     }
 
@@ -111,8 +107,18 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                 });
                             }, function (progress, callback) {
                                 if (progress.bestKillTimestamp) {
+                                    var preScore = 0;
+                                    if (progress.normalCount && progress.normalCount > 0) {
+                                        preScore = progress.normalCount;
+                                    }
+                                    if (progress.heroicCount && progress.heroicCount > 0) {
+                                        preScore = progress.heroicCount * 100;
+                                    }
+                                    if (progress.mythicCount && progress.mythicCount > 0) {
+                                        preScore = progress.mythicCount * 10000;
+                                    }
                                     //Calculate the score for redis bestTimestamp - 2Years * score
-                                    var score = parseInt(progress.bestKillTimestamp / 1000, 10) - (3600 * 24 * 365 * 2 * progress.score);
+                                    var score = parseInt(progress.bestKillTimestamp / 1000, 10) - (3600 * 24 * 365 * 2 * preScore);
                                     async.parallel([
                                         function (callback) {
                                             rankModel.upsert(raid.tier, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {

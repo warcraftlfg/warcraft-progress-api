@@ -128,8 +128,8 @@ module.exports.computeProgress = function (region, realm, name, tier, callback) 
                             if (values[idx + 1].source != "progress") {
                                 //no progress found in + or - 1 sec of wowprogress entry
                                 reduced.timestamps.push([values[idx].timestamp]);
-                            } else if (values[idx].timestamp < 1451602800000) {
-                                //Before 2016/01/01 wowprogress is mandatory
+                            } else if (values[idx].timestamp < 1464739200000) {
+                                //Before 2016/06/01 wowprogress is mandatory
                                 reduced.timestamps.push([values[idx].timestamp]);
                                 idx++;
                             }
@@ -163,7 +163,7 @@ module.exports.computeProgress = function (region, realm, name, tier, callback) 
 
                     if ((value.source == "progress" && ((key.difficulty == "mythic" && value.roster.length >= 16 ) || ((key.difficulty == "normal" || key.difficulty == "heroic") && value.roster.length >= 8))) || value.source == "wowprogress") {
                         return {timestamps: [[value.timestamp]], irrelevantTimestamps: []};
-                    } else if (value.source == "wowprogress" && value.timestamp < 1451602800000) {
+                    } else if (value.source == "wowprogress" && value.timestamp < 1464739200000) {
                         return {timestamps: [[value.timestamp]], irrelevantTimestamps: []};
                     } else {
                         return {timestamps: [], irrelevantTimestamps: [[value.timestamp]]};
