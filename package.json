@@ -12,6 +12,7 @@
     "redis": "*",
     "request": "*",
     "winston": "*",
+    "cheerio":"*",
     "winston-daily-rotate-file": "^1.0.1"
   },
   "scripts": {

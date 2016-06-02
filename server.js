@@ -54,6 +54,11 @@ if (process.argv.indexOf("-pu") != -1) {
 }
 
 
+// -pi start ProgressImportProcess
+if (process.argv.indexOf("-pi") != -1) {
+    processNames.push("ProgressImportProcess");
+}
+
 //Load config file
 var env = process.env.NODE_ENV || "development";
 var config = process.require("config/config.json");
