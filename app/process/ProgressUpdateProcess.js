@@ -112,7 +112,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                             }, function (progress, callback) {
                                 if (progress.bestKillTimestamp) {
                                     //Calculate the score for redis bestTimestamp - 2Years * score
-                                    var score = progress.bestKillTimestamp - (2 * 1000 * 3600 * 24 * 365 * progress.score);
+                                    var score = parseInt(progress.bestKillTimestamp / 1000, 10) - (3600 * 24 * 365 * 2 * progress.score);
                                     async.parallel([
                                         function (callback) {
                                             rankModel.upsert(raid.tier, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
