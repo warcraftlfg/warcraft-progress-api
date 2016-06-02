@@ -15,12 +15,18 @@ var applicationStorage = process.require("core/applicationStorage.js");
  */
 module.exports.find = function (criteria, projection, sort, limit, hint, callback) {
     var collection = applicationStorage.mongo.collection("guilds");
-    if (hint === undefined && limit === undefined && callback == undefined) {
+
+    if (sort == undefined && hint == undefined && limit == undefined && callback == undefined) {
+        callback = projection;
+        collection.find(criteria).toArray(function (error, guilds) {
+            callback(error, guilds);
+        });
+    }else  if (hint == undefined && limit == undefined && callback == undefined) {
         callback = sort;
         collection.find(criteria, projection).toArray(function (error, guilds) {
             callback(error, guilds);
         });
-    } else if (hint === undefined && callback == undefined) {
+    } else if (hint == undefined && callback == undefined) {
         callback = limit;
         collection.find(criteria, projection).sort(sort).toArray(function (error, guilds) {
             callback(error, guilds);

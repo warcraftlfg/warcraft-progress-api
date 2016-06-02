@@ -4,7 +4,7 @@
 var async = require("async");
 var applicationStorage = process.require("core/applicationStorage.js");
 var updateModel = process.require("updates/updateModel.js");
-var guildKillModel = process.require("guildKills/guildKillModel.js");
+var killModel = process.require("kills/killModel.js");
 
 /**
  * Upsert character kills in guildKill and insert pveScore
@@ -60,7 +60,7 @@ module.exports.parseProgress = function (region, character, callback) {
                         class: character.class,
                         averageItemLevelEquipped: character.items.averageItemLevelEquipped
                     };
-                    guildKillModel.upsert(region, character.guild.realm, character.guild.name, raidConfig.tier, boss.name, difficulty, boss[difficulty + 'Timestamp'], "progress", raider, function (error) {
+                    killModel.upsert(region, character.guild.realm, character.guild.name, raidConfig.tier, boss.name, difficulty, boss[difficulty + 'Timestamp'], "progress", raider, function (error) {
                         logger.verbose('Insert Kill %s-%s-%s for %s-%s-%s ', raid.name, difficulty, boss.name, region, character.guild.realm, character.guild.name);
                         update = true;
                         callback(error);
@@ -79,7 +79,7 @@ module.exports.parseProgress = function (region, character, callback) {
             if (error) {
                 callback(error)
             } else {
-                updateModel.insert("wp_gpu", region, character.guild.realm, character.guild.name, 0, function (error) {
+                updateModel.insert("wp_pu", region, character.guild.realm, character.guild.name, 0, function (error) {
                     logger.verbose("Insert GuildProgress to update %s-%s-%s with priority %s", region, character.guild.realm, character.guild.name, 0);
                     callback(error);
                 });

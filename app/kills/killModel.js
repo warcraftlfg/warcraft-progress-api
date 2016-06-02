@@ -3,16 +3,32 @@
 var async = require("async");
 var applicationStorage = process.require("core/applicationStorage.js");
 
+
+/**
+ * Get the kills
+ * @param tier
+ * @param criteria
+ * @param callback
+ */
+module.exports.find = function (tier, criteria, callback) {
+    var collection = applicationStorage.mongo.collection("tier_" + tier);
+
+    collection.find(criteria).toArray(function (error, kills) {
+        callback(error, kills);
+    });
+};
+
 /**
  * Upsert a kill
  * @param region
  * @param realm
  * @param name
- * @param raid
+ * @param tier
  * @param boss
  * @param difficulty
  * @param timestamp
  * @param source
+ * @param raider
  * @param callback
  */
 module.exports.upsert = function (region, realm, name, tier, boss, difficulty, timestamp, source, raider, callback) {
@@ -30,7 +46,7 @@ module.exports.upsert = function (region, realm, name, tier, boss, difficulty, t
         updated: new Date().getTime()
     };
 
-    var collection = applicationStorage.mongo.collection("tier_"+tier);
+    var collection = applicationStorage.mongo.collection("tier_" + tier);
     async.series([
         function (callback) {
             collection.updateOne({
@@ -100,7 +116,7 @@ module.exports.computeProgress = function (region, realm, name, tier, callback) 
             };
 
             var reduce = function (key, values) {
-                var reduced = {timestamps: []};
+                var reduced = {timestamps: [], irrelevantTimestamps: []};
 
                 if (values && values[0] && values[0].timestamps) {
                     reduced = values[0];
@@ -126,11 +142,15 @@ module.exports.computeProgress = function (region, realm, name, tier, callback) 
                             var rosterLength = values[idx].roster.length + values[idx + 1].roster.length;
                             if ((key.difficulty == "mythic" && rosterLength >= 16) || ((key.difficulty == "normal" || key.difficulty == "heroic") && rosterLength >= 8)) {
                                 reduced.timestamps.push([values[idx].timestamp, values[idx + 1].timestamp]);
+                            } else {
+                                reduced.irrelevantTimestamps.push([values[idx].timestamp, values[idx + 1].timestamp]);
                             }
                             idx++;
                         } else {
                             if (values[idx].roster && ((key.difficulty == "mythic" && values[idx].roster.length >= 16) || ((key.difficulty == "normal" || key.difficulty == "heroic") && values[idx].roster.length >= 8 ))) {
                                 reduced.timestamps.push([values[idx].timestamp]);
+                            } else {
+                                reduced.irrelevantTimestamps.push([values[idx].timestamp]);
                             }
                         }
                     }
@@ -142,18 +162,17 @@ module.exports.computeProgress = function (region, realm, name, tier, callback) 
                 if (value.timestamp) {
 
                     if ((value.source == "progress" && ((key.difficulty == "mythic" && value.roster.length >= 16 ) || ((key.difficulty == "normal" || key.difficulty == "heroic") && value.roster.length >= 8))) || value.source == "wowprogress") {
-                        return {timestamps: [[value.timestamp]]};
-                    } else if (value.source == "wowprogress") {
-                        return {timestamps: [[value.timestamp]]};
-                    }
-                    else {
-                        return {timestamps: []};
+                        return {timestamps: [[value.timestamp]], irrelevantTimestamps: []};
+                    } else if (value.source == "wowprogress" && value.timestamp < 1451602800000) {
+                        return {timestamps: [[value.timestamp]], irrelevantTimestamps: []};
+                    } else {
+                        return {timestamps: [], irrelevantTimestamps: [[value.timestamp]]};
                     }
                 }
                 return value;
             };
 
-            var collection = applicationStorage.mongo.collection("tier_"+tier);
+            var collection = applicationStorage.mongo.collection("tier_" + tier);
             collection.mapReduce(map, reduce, {
                 out: {inline: 1},
                 finalize: finalize,

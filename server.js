@@ -48,9 +48,9 @@ if (process.argv.indexOf("-cu") != -1) {
     processNames.push("CharacterUpdateProcess");
 }
 
-// -gpu start GuildProgressUpdateProcess
-if (process.argv.indexOf("-gpu") != -1) {
-    processNames.push("GuildProgressUpdateProcess");
+// -pu start GuildProgressUpdateProcess
+if (process.argv.indexOf("-pu") != -1) {
+    processNames.push("ProgressUpdateProcess");
 }
 
 

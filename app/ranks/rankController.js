@@ -33,6 +33,55 @@ module.exports.getRank = function (req, res, next) {
             next();
         }
     });
+};
 
+
+module.exports.getRanking = function (req, res, next) {
+
+    var logger = applicationStorage.logger;
+    logger.info("%s %s %s %s", req.headers['x-forwarded-for'] || req.connection.remoteAddress, req.method, req.path, JSON.stringify(req.params));
+
+    var start = 0;
+    if (req.query && req.query.start) {
+        start = parseInt(req.query.start, 10) > 0 ? parseInt(req.query.start, 10) - 1 : 0
+    }
+
+    var end = start + 100;
+    if (req.query && req.query.number) {
+        var number = parseInt(req.query.number, 10);
+
+        if (number < 0)
+            number = 100;
+
+        if (number > 100)
+            number = 100;
+
+        end = start + number - 1;
+    }
+
+    var key = req.params.tier;
+    if (req.params.region) {
+        key = req.params.tier + "_" + req.params.region;
+    }
+
+    rankModel.getRanking(key, start, end, function (error, ranking) {
+        if (error) {
+            logger.error(error.message);
+            res.status(500).send(error.message);
+        } else if (ranking) {
+            var finalRanking = {};
+            var counter = 1;
+            async.each(ranking, function (rank, callback) {
+                var rankArray = rank.split('-');
+                finalRanking[start + counter] = {region: rankArray[0], realm: rankArray[1], name: rankArray[2]};
+                counter++;
+                callback();
+            }, function () {
+                res.json(finalRanking);
+            });
+        } else {
+            next();
+        }
+    });
 
 };
