@@ -113,9 +113,15 @@ async.waterfall([
                     });
 
                     db.on("ready", function () {
-                        logger.verbose("Redis connected");
+                        logger.verbose("Redis ready");
                         applicationStorage.redis = db;
                         callback();
+                    });
+
+
+                    db.on("reconnecting", function () {
+                        logger.verbose("Redis reconnecting");
+
                     });
                 }
             ],

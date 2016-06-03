@@ -94,7 +94,7 @@ module.exports.getKills = function (url, callback) {
                     if (!guild || !guild.realm || !guild.name) {
                         logger.warn("Bnet return empty guild %s-%s-%s, skip it", region, realm, name);
                         callback(true);
-                    }else {
+                    } else {
                         callback(error, $, region, guild.realm, guild.name);
                     }
                 });
@@ -111,7 +111,6 @@ module.exports.getKills = function (url, callback) {
                     var kill = {region: region.toLowerCase(), realm: realm, name: name};
 
                     var bossName = $(this).text();
-
 
 
                     var bossArray = bossName.replace(/(^\+)/g, "").trim().split(':');
@@ -131,30 +130,31 @@ module.exports.getKills = function (url, callback) {
                         kill["boss"] = "Xhul'horac";
                     }
                     var date = $(this).parent().next().text();
-                    var timestamp =  new Date(date+" GMT+0000").getTime();
+                    var timestamp = new Date(date + " GMT+0000").getTime();
                     //Fix incorrect kill ...
-                    if(kill["boss"] =="Archimonde")
+                    if (kill["boss"] == "Archimonde")
                         bestTimestamp = timestamp;
 
-                    if(timestamp > bestTimestamp)
+                    if (timestamp > bestTimestamp)
                         kill["timestamp"] = bestTimestamp;
                     else
                         kill["timestamp"] = timestamp;
 
 
-
-                    kills.push(kill);
+                    if (kill["timestamp"] < new Date("Jun 01 2016 GMT+0000").getTime())
+                        kills.push(kill);
 
 
                 });
-                callback(null,kills)
+                callback(null, kills)
             }
 
         ],
         function (error, kills) {
             callback(error, kills);
         }
-    );
+    )
+    ;
 
 };
 

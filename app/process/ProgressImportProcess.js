@@ -23,7 +23,7 @@ ProgressImportProcess.prototype.import = function () {
     var self = this;
 
     var maxPage = 2471;
-    var count = 22;
+    var count = -1;
     async.whilst(
         function () {
             return count <= maxPage;
@@ -38,7 +38,7 @@ ProgressImportProcess.prototype.import = function () {
                     });
                 },
                 function (guildUrls, callback) {
-                    async.forEachSeries(guildUrls, function (guildUrl, callback) {
+                    async.each(guildUrls, function (guildUrl, callback) {
                         async.waterfall([
 
                             function (callback) {
