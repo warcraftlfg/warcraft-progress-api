@@ -14,7 +14,7 @@ var applicationStorage = process.require("core/applicationStorage.js");
  * @param callback
  */
 module.exports.getGuild = function (region, realm, name, params, callback) {
-    var endUrl = "wow/guild/" + realm + "/" + name + "?fields=" + params.join(',') + "&locale=en_GB&apikey=" + applicationStorage.config.bnet.clientID;
+    var endUrl = "wow/guild/" + realm + "/" + name + "?fields=" + params.join(',') + "&locale=en_GB&apikey=" + applicationStorage.clientID;
     this.requestBnetApi(region, endUrl, function (error, statusCode) {
         callback(error, statusCode);
     });
@@ -30,7 +30,7 @@ module.exports.getGuild = function (region, realm, name, params, callback) {
  * @param callback
  */
 module.exports.getCharacter = function (region, realm, name, params, callback) {
-    var endUrl = "wow/character/" + realm + "/" + name + "?fields=" + params.join(',') + "&locale=en_GB&apikey=" + applicationStorage.config.bnet.clientID;
+    var endUrl = "wow/character/" + realm + "/" + name + "?fields=" + params.join(',') + "&locale=en_GB&apikey=" + applicationStorage.clientID;
     this.requestBnetApi(region, endUrl, function (error, statusCode) {
         callback(error, statusCode);
     });
@@ -57,7 +57,7 @@ module.exports.getUserCharacters = function (region, accessToken, callback) {
  * @param callback
  */
 module.exports.getRealms = function (region, callback) {
-    var endUrl = encodeURI("wow/realm/status?locale=en_GB&apikey=" + applicationStorage.config.bnet.clientID);
+    var endUrl = encodeURI("wow/realm/status?locale=en_GB&apikey=" + applicationStorage.clientID);
     this.requestBnetApi(region, endUrl, function (error, result) {
         callback(error, result && result.realms);
     });
@@ -74,7 +74,7 @@ module.exports.getAuctions = function (region, realm, callback) {
     var self = this;
     async.waterfall([
         function (callback) {
-            var endUrl = encodeURI("wow/auction/data/" + realm + "?locale=en_GB&apikey=" + applicationStorage.config.bnet.clientID);
+            var endUrl = encodeURI("wow/auction/data/" + realm + "?locale=en_GB&apikey=" + applicationStorage.clientID);
             self.requestBnetApi(region, endUrl, function (error, result) {
                 var auctionUrl = encodeURI(result.files[0].url);
                 callback(error, auctionUrl);

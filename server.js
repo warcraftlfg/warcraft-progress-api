@@ -28,6 +28,12 @@ if (process.argv.indexOf("-p") != -1) {
 }
 
 
+if (process.argv.indexOf("-id") != -1) {
+    var clientID = parseInt(process.argv[process.argv.indexOf("-id") + 1], 10)
+}
+
+
+
 // -ws start WebServerProcess
 if (process.argv.indexOf("-ws") != -1) {
     processNames.push("WebServerProcess");
@@ -69,6 +75,14 @@ async.waterfall([
     //Load the config file
     function (callback) {
         applicationStorage.config = config;
+
+        //Set the clientID
+        if(clientID){
+            applicationStorage.clientID = applicationStorage.config.bnet["clientID"+clientID];
+        }else {
+            applicationStorage.clientID = applicationStorage.config.bnet.clientID;
+
+        }
         callback();
     },
     //Initialize the logger

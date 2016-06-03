@@ -134,7 +134,7 @@ module.exports.getKills = function (url, callback) {
 
                     if(isNaN(timestamp)){
                         timestamp = parseInt($(this).parent().next().find('.datetime').attr('data-ts'),10)*1000;
-                    };
+                    }
 
                     //Fix incorrect kill ...
                     if (kill["boss"] == "Archimonde")
