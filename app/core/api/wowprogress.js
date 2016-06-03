@@ -105,7 +105,7 @@ module.exports.getKills = function (url, callback) {
             function ($, region, realm, name, callback) {
                 var kills = [];
 
-                var bestTimestamp = 0;
+                var bestTimestamp = 999999999999999999999;
                 $('table.rating a.boss_kills_link').each(function (i, elem) {
 
                     var kill = {region: region.toLowerCase(), realm: realm, name: name};
