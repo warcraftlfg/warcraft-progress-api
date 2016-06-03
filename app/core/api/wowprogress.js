@@ -131,6 +131,12 @@ module.exports.getKills = function (url, callback) {
                     }
                     var date = $(this).parent().next().text();
                     var timestamp = new Date(date + " GMT+0000").getTime();
+
+                    if(isNaN(timestamp)){
+                        timestamp = parseInt($(this).parent().next().find('.datetime').attr('data-ts'),10)*1000;
+                    };
+
+                    console.log(timestamp);
                     //Fix incorrect kill ...
                     if (kill["boss"] == "Archimonde")
                         bestTimestamp = timestamp;

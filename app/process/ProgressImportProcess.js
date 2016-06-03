@@ -73,7 +73,7 @@ ProgressImportProcess.prototype.import = function () {
                                 }
                             }
                         ], function (error) {
-                            if (error) {
+                            if (error && error !== true) {
                                 logger.error(error.message);
                             }
                             callback();
