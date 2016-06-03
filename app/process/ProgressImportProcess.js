@@ -23,7 +23,7 @@ ProgressImportProcess.prototype.import = function () {
     var self = this;
 
     var maxPage = 2471;
-    var count = -1;
+    var count = 22;
     async.whilst(
         function () {
             return count <= maxPage;
@@ -84,17 +84,17 @@ ProgressImportProcess.prototype.import = function () {
                 }
             ], function (error) {
                 if (error) {
-                    logger.error(error.message);
+                    if (error && error !== true) {
+                        logger.error(error.message);
+                    }
                 }
                 count++;
                 callback(null, count);
             });
 
         },
-        function (err, n) {
-            if (error && error !== true) {
-                logger.error(error.message);
-            }
+        function () {
+
             self.import();
         }
     );

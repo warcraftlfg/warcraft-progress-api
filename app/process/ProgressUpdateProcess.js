@@ -107,6 +107,8 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                 });
                             }, function (progress, callback) {
                                 if (progress.bestKillTimestamp) {
+                                    logger.verbose("Update Score for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+
                                     var preScore = 0;
                                     if (progress.normalCount && progress.normalCount > 0) {
                                         preScore = progress.normalCount;

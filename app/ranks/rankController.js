@@ -46,17 +46,17 @@ module.exports.getRanking = function (req, res, next) {
         start = parseInt(req.query.start, 10) > 0 ? parseInt(req.query.start, 10) - 1 : 0
     }
 
-    var end = start + 100;
+    var end = start + 99;
     if (req.query && req.query.limit) {
         var limit = parseInt(req.query.limit, 10);
 
         if (limit < 0)
-            limit = 100;
+            limit = 99;
 
-        if (limit > 100)
-            limit = 100;
+        if (limit > 500)
+            limit = 500;
 
-        end = start + limit - 1;
+        end = start + limit;
     }
 
     var key = req.params.tier;

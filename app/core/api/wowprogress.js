@@ -16,9 +16,9 @@ module.exports.getWoWProgressPage = function (path, callback) {
     logger.verbose("GET wowprogress URL %s", url);
     request(url, function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            callback(error, body);
+            callback(null, body);
         } else {
-            callback(new Error("Error HTTP " + response.statusCode + " on fetching wowprogress api " + url));
+            callback(new Error("Error HTTP " + error.message + " on fetching wowprogress api " + url));
         }
     });
 };
@@ -27,7 +27,7 @@ module.exports.getGuildsUrlsOnPage = function (number, callback) {
     var self = this;
     async.waterfall([
         function (callback) {
-            if(number == -1 ){
+            if (number == -1) {
                 var url = "/pve/rating/next";
             } else {
                 var url = "/pve/rating/next/" + number + "/rating";
@@ -66,22 +66,22 @@ module.exports.getKills = function (url, callback) {
             },
             function (body, callback) {
 
-                var $body = cheerio.load(body);
+                var $ = cheerio.load(body);
 
 
-                var armoryUrl = decodeURIComponent(($body('.armoryLink').attr('href')));
+                var armoryUrl = decodeURIComponent(($('.armoryLink').attr('href')));
 
                 if (armoryUrl == "undefined") {
                     return callback(new Error('Armory link undefined'));
                 }
                 try {
-                    var name = $body('h1').text().match("“(.*)” WoW Guild")[1];
+                    var name = $('h1').text().match("“(.*)” WoW Guild")[1];
                     var realm = armoryUrl.match('battle.net/wow/guild/(.*)/(.*)/')[1];
                     var region = armoryUrl.match('http://(.*).battle.net/wow/guild/')[1];
                 } catch (e) {
                     logger.info("Parsing error, trying CN");
                     try {
-                        var name = $body('h1').text().match("“(.*)” WoW Guild")[1];
+                        var name = $('h1').text().match("“(.*)” WoW Guild")[1];
                         var realm = armoryUrl.match('www.battlenet.com.cn/wow/guild/(.*)/(.*)/')[1];
                         var region = armoryUrl.match('http://www.battlenet.com.(.*)/wow/guild/')[1];
                     } catch (e) {
@@ -91,11 +91,12 @@ module.exports.getKills = function (url, callback) {
                 }
 
                 bnetAPI.getGuild(region, realm, name, [], function (error, guild) {
-                    if (guild == null) {
+                    if (!guild || !guild.realm || !guild.name) {
                         logger.warn("Bnet return empty guild %s-%s-%s, skip it", region, realm, name);
                         callback(true);
+                    }else {
+                        callback(error, $, region, guild.realm, guild.name);
                     }
-                    callback(error, $body, region, guild.realm, guild.name);
                 });
 
 
@@ -104,98 +105,53 @@ module.exports.getKills = function (url, callback) {
             function ($, region, realm, name, callback) {
                 var kills = [];
 
+                var bestTimestamp = 0;
+                $('table.rating a.boss_kills_link').each(function (i, elem) {
 
-                $('body').find('table.rating tr td span').each(function (i, elem) {
+                    var kill = {region: region.toLowerCase(), realm: realm, name: name};
 
-                            console.log($(this).html());
-
-
+                    var bossName = $(this).text();
 
 
+
+                    var bossArray = bossName.replace(/(^\+)/g, "").trim().split(':');
+                    kill["boss"] = bossArray[1].trim();
+
+                    if (bossArray[0] == 'N') {
+                        kill["difficulty"] = 'normal';
+                    } else if (bossArray[0] == 'H') {
+                        kill["difficulty"] = 'heroic'
+                    } else if (bossArray[0] == 'M') {
+                        kill["difficulty"] = 'mythic';
+                    } else {
+                        callback(new Error("WOWPROGRESS_PARSING_ERROR"));
+                    }
+
+                    if (kill["boss"] == "Xhul&apos;horac") {
+                        kill["boss"] = "Xhul'horac";
+                    }
+                    var date = $(this).parent().next().text();
+                    var timestamp =  new Date(date+" GMT+0000").getTime();
+                    //Fix incorrect kill ...
+                    if(kill["boss"] =="Archimonde")
+                        bestTimestamp = timestamp;
+
+                    if(timestamp > bestTimestamp)
+                        kill["timestamp"] = bestTimestamp;
+                    else
+                        kill["timestamp"] = timestamp;
+
+
+
+                    kills.push(kill);
 
 
                 });
-
-                /*var tables = $body('table.rating').html();
-                var pattern = /<td><span style="white-space:nowrap"[^>]*([^<]*)[^<]*)/span[^>]
-                var array;
-                var array2;
-                var bosses = [];
-
-                async.waterfall([
-                    function (callback) {
-                        async.whilst(function () {
-                            return array = pattern.exec(tables)
-                        }, function (callback) {
-                            var boss = array[2];
-                            var boss_id = array[1];
-                            bosses.push({name: boss, timestamp: timestamp * 1000});
-
-
-                            self.getWoWProgressPage(url + "?boss_kills=" + boss_id, function (error, body) {
-                                if (error) {
-                                    callback();
-                                } else {
-                                    var pattern2 = /data-ts="([^"]*)" data-hint=/gi;
-                                    async.whilst(function () {
-                                            return array2 = pattern2.exec(body)
-                                        }, function (callback) {
-                                            var timestamp = parseInt(array2[1], 10);
-                                            if (!isNaN(timestamp)) {
-
-                                            }
-                                            callback();
-                                        },
-                                        function () {
-                                            callback();
-                                        });
-                                }
-                            });
-                        }, function () {
-                            callback(null, bosses);
-                        });
-                    },
-                    function (bosses, callback) {
-                        async.each(bosses, function (boss, callback) {
-                            var kill = {region: region.toLowerCase(), realm: realm, name: name};
-
-                            kill["timestamp"] = boss.timestamp;
-                            boss = boss.name.replace(/(^\+)/g, "").trim().split(':');
-                            kill["boss"] = boss[1].trim();
-                            if (boss[0] == 'N') {
-                                kill["difficulty"] = 'normal';
-                            } else if (boss[0] == 'H') {
-                                kill["difficulty"] = 'heroic'
-                            } else if (boss[0] == 'M') {
-                                kill["difficulty"] = 'mythic';
-                            } else {
-                                callback(new Error("WOWPROGRESS_PARSING_ERROR"));
-                            }
-
-
-                            if (kill["boss"] == "Xhul&apos;horac") {
-                                kill["boss"] = "Xhul'horac";
-                            }
-                            kills.push(kill);
-                            callback();
-
-                        }, function () {
-                            callback();
-                        });
-
-                    }
-                ], function (error) {
-                    if (!error) {
-                        logger.info("Found %s kills for guild %s-%s-%s", kills.length, region, realm, name);
-                    }
-                    callback(error, kills);
-
-                });
-                 */
+                callback(null,kills)
             }
 
         ],
-        function (error,kills) {
+        function (error, kills) {
             callback(error, kills);
         }
     );
