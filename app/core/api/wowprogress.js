@@ -136,7 +136,6 @@ module.exports.getKills = function (url, callback) {
                         timestamp = parseInt($(this).parent().next().find('.datetime').attr('data-ts'),10)*1000;
                     };
 
-                    console.log(timestamp);
                     //Fix incorrect kill ...
                     if (kill["boss"] == "Archimonde")
                         bestTimestamp = timestamp;
