@@ -8,6 +8,7 @@
     "body-parser": "*",
     "compression": "*",
     "express": "*",
+    "lodash": "*",
     "mongodb": "*",
     "redis": "*",
     "request": "*",

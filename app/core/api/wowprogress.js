@@ -2,12 +2,13 @@
 
 //Load dependencies
 var request = require("request");
-
-//Configuration
-var applicationStorage = process.require("core/applicationStorage.js");
+var _ = require('lodash');
 var cheerio = require("cheerio");
 var async = require("async");
 var bnetAPI = process.require("core/api/bnet.js");
+
+//Configuration
+var applicationStorage = process.require("core/applicationStorage.js");
 
 
 module.exports.getWoWProgressPage = function (path, callback) {
@@ -106,6 +107,16 @@ module.exports.getKills = function (url, callback) {
                 var kills = [];
 
                 var bestTimestamp = 999999999999999999999;
+                var normalCount = 0;
+                var heroicCount = 0;
+                var mythicCount = 0;
+                var normalArchimonde = false;
+                var heroicArchimonde = false;
+                var mythicArchimonde = false;
+                var normalArchimondeTimestamp = 0;
+                var heroicArchimondeTimestamp = 0;
+                var mythicArchimondeTimestamp = 0;
+
                 $('table.rating a.boss_kills_link').each(function (i, elem) {
 
                     var kill = {region: region.toLowerCase(), realm: realm, name: name};
@@ -118,10 +129,13 @@ module.exports.getKills = function (url, callback) {
 
                     if (bossArray[0] == 'N') {
                         kill["difficulty"] = 'normal';
+                        normalCount++;
                     } else if (bossArray[0] == 'H') {
                         kill["difficulty"] = 'heroic'
+                        heroicCount++;
                     } else if (bossArray[0] == 'M') {
                         kill["difficulty"] = 'mythic';
+                        mythicCount++;
                     } else {
                         callback(new Error("WOWPROGRESS_PARSING_ERROR"));
                     }
@@ -132,34 +146,118 @@ module.exports.getKills = function (url, callback) {
                     var date = $(this).parent().next().text();
                     var timestamp = new Date(date + " GMT+0000").getTime();
 
-                    if(isNaN(timestamp)){
-                        timestamp = parseInt($(this).parent().next().find('.datetime').attr('data-ts'),10)*1000;
+                    if (isNaN(timestamp)) {
+                        timestamp = parseInt($(this).parent().next().find('.datetime').attr('data-ts'), 10) * 1000;
                     }
 
                     //Fix incorrect kill ...
-                    if (kill["boss"] == "Archimonde")
+                    if (kill["boss"] == "Archimonde") {
                         bestTimestamp = timestamp;
 
-                    if (timestamp > bestTimestamp)
+                        if (kill["difficulty"] == "normal") {
+                            normalArchimonde = true;
+                            normalArchimondeTimestamp = timestamp;
+                        } else if (kill["difficulty"] == "heroic") {
+                            heroicArchimonde = true;
+                            heroicArchimondeTimestamp = timestamp;
+                        } else if (kill["difficulty"] == "mythic") {
+                            mythicArchimonde = true;
+                            mythicArchimondeTimestamp = timestamp;
+                        }
+
+                    }
+
+                    if (timestamp > bestTimestamp) {
                         kill["timestamp"] = bestTimestamp;
-                    else
+                    } else {
                         kill["timestamp"] = timestamp;
+                    }
 
 
-                    if (kill["timestamp"] < new Date("Jun 01 2016 GMT+0000").getTime())
+                    if (kill["timestamp"] < new Date("Jun 01 2016 GMT+0000").getTime()) {
                         kills.push(kill);
+                    }
 
 
                 });
-                callback(null, kills)
+
+
+                var bossList = [
+                    "Hellfire Assault",
+                    "Iron Reaver",
+                    "Kormrok", "Hellfire High Council",
+                    "Kilrogg Deadeye",
+                    "Gorefiend",
+                    "Shadow-Lord Iskar",
+                    "Socrethar the Eternal",
+                    "Tyrant Velhari",
+                    "Fel Lord Zakuun",
+                    "Xhul'horac",
+                    "Mannoroth",
+                    "Archimonde"];
+
+                if (normalArchimonde && normalCount < 13) {
+                    var normalKills = []
+                    async.forEach(bossList,function (boss) {
+                        var normalKill = {};
+                        normalKill.boss = boss;
+                        normalKill.difficulty = "normal";
+                        normalKill.region = region.toLowerCase();
+                        normalKill.realm = realm;
+                        normalKill.name = name;
+                        normalKill.timestamp = normalArchimonde;
+                        normalKills.push(normalKill);
+
+                    });
+                    kills.concat(normalKills);
+                    //LODASH UNION 
+
+                }
+
+
+                if (heroicArchimonde && heroicCount < 13) {
+                    var heroicKills = [];
+                    async.forEach(bossList,function (boss) {
+                        var heroicKill = {};
+                        heroicKill.boss = boss;
+                        heroicKill.difficulty = "heroic";
+                        heroicKill.region = region.toLowerCase();
+                        heroicKill.realm = realm;
+                        heroicKill.name = name;
+                        heroicKill.timestamp = heroicArchimondeTimestamp;
+                        heroicKills.push(heroicKill);
+
+                    });
+                    kills = kills.concat(heroicKills);
+                }
+                if (mythicArchimonde && mythicCount < 13) {
+                    var mythicKills = [];
+                    async.forEach(bossList,function (boss) {
+                        var mythicKill = {};
+                        mythicKill.boss = boss;
+                        mythicKill.difficulty = "mythic";
+                        mythicKill.region = region.toLowerCase();
+                        mythicKill.realm = realm;
+                        mythicKill.name = name;
+                        mythicKill.timestamp = mythicArchimondeTimestamp;
+                        mythicKills.push(mythicKill);
+                    });
+                    kills = kills.concat(mythicKills);
+                    console.log(mythicKills);
+
+                }
+
+                kills = _.uniqBy(kills, function (elem) {
+                    return elem.boss + elem.difficulty;
+                });
+                callback(null, kills);
             }
 
         ],
         function (error, kills) {
             callback(error, kills);
         }
-    )
-    ;
+    );
 
 };
 

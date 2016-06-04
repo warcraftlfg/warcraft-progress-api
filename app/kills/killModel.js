@@ -140,14 +140,14 @@ module.exports.computeProgress = function (region, realm, name, tier, callback) 
                     else if (values[idx].source === "progress") {
                         if (idx < values.length - 1 && values[idx].timestamp + 1000 >= values[idx + 1].timestamp && values[idx + 1].source == "progress" && values[idx + 1].roster) {
                             var rosterLength = values[idx].roster.length + values[idx + 1].roster.length;
-                            if ((key.difficulty == "mythic" && rosterLength >= 16) || ((key.difficulty == "normal" || key.difficulty == "heroic") && rosterLength >= 8)) {
+                            if ((key.difficulty == "mythic" && rosterLength >= 11) || ((key.difficulty == "normal" || key.difficulty == "heroic") && rosterLength >= 7)) {
                                 reduced.timestamps.push([values[idx].timestamp, values[idx + 1].timestamp]);
                             } else {
                                 reduced.irrelevantTimestamps.push([values[idx].timestamp, values[idx + 1].timestamp]);
                             }
                             idx++;
                         } else {
-                            if (values[idx].roster && ((key.difficulty == "mythic" && values[idx].roster.length >= 16) || ((key.difficulty == "normal" || key.difficulty == "heroic") && values[idx].roster.length >= 8 ))) {
+                            if (values[idx].roster && ((key.difficulty == "mythic" && values[idx].roster.length >= 11) || ((key.difficulty == "normal" || key.difficulty == "heroic") && values[idx].roster.length >= 7 ))) {
                                 reduced.timestamps.push([values[idx].timestamp]);
                             } else {
                                 reduced.irrelevantTimestamps.push([values[idx].timestamp]);
@@ -161,7 +161,7 @@ module.exports.computeProgress = function (region, realm, name, tier, callback) 
             var finalize = function (key, value) {
                 if (value.timestamp) {
 
-                    if ((value.source == "progress" && ((key.difficulty == "mythic" && value.roster.length >= 16 ) || ((key.difficulty == "normal" || key.difficulty == "heroic") && value.roster.length >= 8))) || value.source == "wowprogress") {
+                    if ((value.source == "progress" && ((key.difficulty == "mythic" && value.roster.length >= 11 ) || ((key.difficulty == "normal" || key.difficulty == "heroic") && value.roster.length >= 7))) || value.source == "wowprogress") {
                         return {timestamps: [[value.timestamp]], irrelevantTimestamps: []};
                     } else if (value.source == "wowprogress" && value.timestamp < 1464739200000) {
                         return {timestamps: [[value.timestamp]], irrelevantTimestamps: []};
