@@ -26,6 +26,18 @@ GuildUpdateProcess.prototype.updateGuild = function () {
 
     async.waterfall([
         function (callback) {
+            updateModel.getCount("wp_cu", 3, function (error, count) {
+                if (count > 50000) {
+                    logger.info("Too many characters in priority 3 ... waiting 1 min ");
+                    setTimeout(function () {
+                        callback(true);
+                    }, 3000);
+                } else {
+                    callback();
+                }
+            });
+        },
+        function (callback) {
             //Get next guild to update
             updateService.getNextUpdate('wp_gu', function (error, guildUpdate) {
                 if (guildUpdate == null) {
@@ -35,13 +47,13 @@ GuildUpdateProcess.prototype.updateGuild = function () {
                         callback(true);
                     }, 3000);
                 } else {
-                    logger.info("Update guild %s-%s-%s", guildUpdate.region, guildUpdate.realm, guildUpdate.name);
                     callback(error, guildUpdate);
                 }
             });
         },
         function (guildUpdate, callback) {
             //Sanitize name
+            logger.info("Update guild %s-%s-%s", guildUpdate.region, guildUpdate.realm, guildUpdate.name);
             bnetAPI.getGuild(guildUpdate.region, guildUpdate.realm, guildUpdate.name, ["members"], function (error, guild) {
                 if (error) {
                     if (error.statusCode == 403) {
