@@ -197,8 +197,8 @@ module.exports.getKills = function (url, callback) {
                     "Archimonde"];
 
                 if (normalArchimonde && normalCount < 13) {
-                    var normalKills = []
-                    async.forEach(bossList,function (boss) {
+                    var normalKills = [];
+                    async.forEach(bossList, function (boss) {
                         var normalKill = {};
                         normalKill.boss = boss;
                         normalKill.difficulty = "normal";
@@ -217,7 +217,7 @@ module.exports.getKills = function (url, callback) {
 
                 if (heroicArchimonde && heroicCount < 13) {
                     var heroicKills = [];
-                    async.forEach(bossList,function (boss) {
+                    async.forEach(bossList, function (boss) {
                         var heroicKill = {};
                         heroicKill.boss = boss;
                         heroicKill.difficulty = "heroic";
@@ -232,7 +232,7 @@ module.exports.getKills = function (url, callback) {
                 }
                 if (mythicArchimonde && mythicCount < 13) {
                     var mythicKills = [];
-                    async.forEach(bossList,function (boss) {
+                    async.forEach(bossList, function (boss) {
                         var mythicKill = {};
                         mythicKill.boss = boss;
                         mythicKill.difficulty = "mythic";
@@ -243,10 +243,7 @@ module.exports.getKills = function (url, callback) {
                         mythicKills.push(mythicKill);
                     });
                     kills = kills.concat(mythicKills);
-                    console.log(mythicKills);
-
                 }
-
                 kills = _.uniqBy(kills, function (elem) {
                     return elem.boss + elem.difficulty;
                 });

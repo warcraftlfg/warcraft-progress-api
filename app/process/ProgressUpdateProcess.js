@@ -56,7 +56,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                 async.forEachSeries(result, function (obj, callback) {
 
 
-                                    logger.verbose("Kills found for %s-%s (%s)", obj._id.boss, obj._id.difficulty, obj.value.timestamps.join(','))
+                                    logger.verbose("Kills found for %s-%s R:(%s) I:(%s)", obj._id.boss, obj._id.difficulty, obj.value.timestamps.join(','),obj.value.irrelevantTimestamps.join(','))
 
                                     if (!progress[obj._id.difficulty]) {
                                         progress[obj._id.difficulty] = {};

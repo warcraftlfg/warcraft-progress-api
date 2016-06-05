@@ -65,6 +65,11 @@ if (process.argv.indexOf("-pi") != -1) {
     processNames.push("ProgressImportProcess");
 }
 
+// -wcron start WeeklyCronProcess
+if (process.argv.indexOf("-wcron") != -1) {
+    processNames.push("WeeklyCronProcess");
+}
+
 //Load config file
 var env = process.env.NODE_ENV || "development";
 var config = process.require("config/config.json");
@@ -81,7 +86,6 @@ async.waterfall([
             applicationStorage.clientID = applicationStorage.config.bnet["clientID"+clientID];
         }else {
             applicationStorage.clientID = applicationStorage.config.bnet.clientID;
-
         }
         callback();
     },
@@ -106,7 +110,6 @@ async.waterfall([
             level: config.logger.level,
             transports: transports
         });
-
         callback();
     },
     // Establish a connection to the database
@@ -130,12 +133,6 @@ async.waterfall([
                         logger.verbose("Redis ready");
                         applicationStorage.redis = db;
                         callback();
-                    });
-
-
-                    db.on("reconnecting", function () {
-                        logger.verbose("Redis reconnecting");
-
                     });
                 }
             ],
