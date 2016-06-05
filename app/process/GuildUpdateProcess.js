@@ -26,18 +26,6 @@ GuildUpdateProcess.prototype.updateGuild = function () {
 
     async.waterfall([
         function (callback) {
-            updateModel.getCount("wp_cu", 3, function (error, count) {
-                if (count > 50000) {
-                    logger.info("Too many characters in priority 3 ... waiting 1 min ");
-                    setTimeout(function () {
-                        callback(true);
-                    }, 3000);
-                } else {
-                    callback();
-                }
-            });
-        },
-        function (callback) {
             //Get next guild to update
             updateService.getNextUpdate('wp_gu', function (error, guildUpdate) {
                 if (guildUpdate == null) {
@@ -50,6 +38,24 @@ GuildUpdateProcess.prototype.updateGuild = function () {
                     callback(error, guildUpdate);
                 }
             });
+        },
+        function (guildUpdate, callback) {
+            if (guildUpdate.priority <= 3) {
+                updateModel.getCount("wp_cu", 3, function (error, count) {
+                    if (count > 50000) {
+                        logger.info("Too many characters in priority 3 ... waiting 1 min ");
+                        updateModel.insert("wp_gu", guildUpdate.region, guildUpdate.realm, guildUpdate.name, guildUpdate.priority, function () {
+                            setTimeout(function () {
+                                callback(true);
+                            }, 60000);
+                        });
+                    } else {
+                        callback(error, guildUpdate);
+                    }
+                });
+            } else {
+                callback(null, guildUpdate)
+            }
         },
         function (guildUpdate, callback) {
             //Sanitize name
