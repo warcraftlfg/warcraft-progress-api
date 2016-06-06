@@ -157,7 +157,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
             setTimeout(function () {
                 self.updateGuildProgress();
 
-            }, 500);
+            }, 200);
 
         }
     )
