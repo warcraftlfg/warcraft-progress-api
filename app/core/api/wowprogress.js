@@ -146,9 +146,17 @@ module.exports.getKills = function (url, callback) {
                     var date = $(this).parent().next().text();
                     var timestamp = new Date(date + " GMT+0000").getTime();
 
+
+                    if (isNaN(timestamp)) {
+                        timestamp = new Date(date.substring(1,date.length) + " GMT+0000").getTime();
+                    }
+
                     if (isNaN(timestamp)) {
                         timestamp = parseInt($(this).parent().next().find('.datetime').attr('data-ts'), 10) * 1000;
                     }
+
+
+
 
                     //Fix incorrect kill ...
                     if (kill["boss"] == "Archimonde") {
@@ -210,7 +218,6 @@ module.exports.getKills = function (url, callback) {
 
                     });
                     kills.concat(normalKills);
-                    //LODASH UNION 
 
                 }
 
