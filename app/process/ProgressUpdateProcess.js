@@ -153,7 +153,12 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
             if (error && error !== true) {
                 logger.error(error.message);
             }
-            self.updateGuildProgress();
+            //Wait 200 before next update
+            setTimeout(function () {
+                self.updateGuildProgress();
+
+            }, 200);
+
         }
     )
     ;
