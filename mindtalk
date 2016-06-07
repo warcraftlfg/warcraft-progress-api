@@ -1,21 +1,19 @@
-TODO
-1 truc qui delete les guildes en 404.
+HOW TO UPDATE Warcraftlfg
 
-Redis je fais une list avec poid le poid le plus petit est le mieux placer.
+--> Migrate collections between database warcraft-progress -> warcraft-lfg (tier_18)
+--> Change in guildUpdateprocess to remove call for progress
+--> Change client display for progress (include tier_18)
+--> On guild update set wp_gu_5 for this guild.
+--> Every Day set the guild rank in guilds and set guild to update with priority 3
 
-tier_18
-tier_18_tw
-tier_18_eu
-tier_18_us
-tier_18_kr
+--> Delete database warcraft-progress
 
-Le poid le plus petit se calcul de la façon suivante
-
-timestamp - poid du boss
-
-
-Kill T0
-T0 -
-
-
-
+Lists of collection :
+guilds
+characters
+messages
+conversations
+users
+realms
+tier_N
+sessions
