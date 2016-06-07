@@ -151,7 +151,7 @@ module.exports.getKills = function (url, callback) {
                         timestamp = new Date(date.substring(1,date.length) + " GMT+0000").getTime();
                     }
 
-                    if (isNaN(timestamp)) {
+                    if (isNaN(timestamp) || timestamp < 1388534400000) {
                         timestamp = parseInt($(this).parent().next().find('.datetime').attr('data-ts'), 10) * 1000;
                     }
 

@@ -95,7 +95,7 @@ ProgressImportProcess.prototype.import = function () {
         },
         function () {
 
-            self.import();
+            process.exit();
         }
     );
 };
