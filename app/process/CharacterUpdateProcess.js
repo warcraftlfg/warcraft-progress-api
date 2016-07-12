@@ -35,13 +35,22 @@ CharacterUpdateProcess.prototype.updateCharacter = function () {
                     }, 3000);
                 } else {
                     logger.info("Update character %s-%s-%s", characterUpdate.region, characterUpdate.realm, characterUpdate.name);
-                    callback(error, characterUpdate);
+
+                    //CN PATCH
+                    if (characterUpdate.region == 'cn') {
+                        callback(true);
+                    } else {
+                        callback(error, characterUpdate);
+
+                    }
+
+
                 }
             });
         },
         function (characterUpdate, callback) {
             //Sanitize name
-            bnetAPI.getCharacter(characterUpdate.region, characterUpdate.realm, characterUpdate.name, ["items","guild","talents","progression"], function (error, character) {
+            bnetAPI.getCharacter(characterUpdate.region, characterUpdate.realm, characterUpdate.name, ["items", "guild", "talents", "progression"], function (error, character) {
                 if (error) {
                     if (error.statusCode == 403) {
                         logger.info("Bnet Api Deny ... waiting 1 min");

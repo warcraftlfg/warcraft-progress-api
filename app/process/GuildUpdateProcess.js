@@ -35,7 +35,12 @@ GuildUpdateProcess.prototype.updateGuild = function () {
                         callback(true);
                     }, 3000);
                 } else {
-                    callback(error, guildUpdate);
+                    //CN PATCH
+                    if (guildUpdate.region == 'cn') {
+                        callback(true);
+                    } else {
+                        callback(error, guildUpdate);
+                    }
                 }
             });
         },
