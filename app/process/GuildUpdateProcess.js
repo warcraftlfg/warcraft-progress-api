@@ -6,7 +6,6 @@ var applicationStorage = process.require("core/applicationStorage.js");
 var updateModel = process.require("updates/updateModel.js");
 var updateService = process.require("updates/updateService.js");
 var guildService = process.require("guilds/guildService.js");
-var guildModel = process.require("guilds/guildModel.js");
 var bnetAPI = process.require("core/api/bnet.js");
 
 /**

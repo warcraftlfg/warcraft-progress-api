@@ -5,9 +5,11 @@ var async = require("async");
 var applicationStorage = process.require("core/applicationStorage.js");
 var updateModel = process.require("updates/updateModel.js");
 var updateService = process.require("updates/updateService.js");
-var guildModel = process.require("guilds/guildModel.js");
+var guildProgressModel = process.require("guildProgress/guildProgressModel.js");
 var killModel = process.require("kills/killModel.js");
 var rankModel = process.require("ranks/rankModel.js");
+var realmModel = process.require("realms/realmModel.js");
+var bnetAPI = process.require("core/api/bnet.js");
 
 /**
  * ProgressUpdateProcess constructor
@@ -56,7 +58,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                 async.forEachSeries(result, function (obj, callback) {
 
 
-                                    logger.verbose("Kills found for %s-%s R:(%s) I:(%s)", obj._id.boss, obj._id.difficulty, obj.value.timestamps.join(','),obj.value.irrelevantTimestamps.join(','))
+                                    logger.verbose("Kills found for %s-%s R:(%s) I:(%s)", obj._id.boss, obj._id.difficulty, obj.value.timestamps.join(','), obj.value.irrelevantTimestamps.join(','))
 
                                     if (!progress[obj._id.difficulty]) {
                                         progress[obj._id.difficulty] = {};
@@ -99,13 +101,14 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                     progress.updated = new Date().getTime();
                                     obj["tier_" + raid.tier] = progress;
 
-                                    guildModel.upsert(guildProgress.region, guildProgress.realm, guildProgress.name, {progress: obj}, function (error) {
+                                    guildProgressModel.upsert(guildProgress.region, guildProgress.realm, guildProgress.name, {progress: obj}, function (error) {
                                         logger.verbose("Update Progress for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
                                         callback(error, progress);
                                     });
 
                                 });
                             }, function (progress, callback) {
+                                progress.bestKillTimestamp = 1;
                                 if (progress.bestKillTimestamp) {
                                     logger.verbose("Update Score for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
 
@@ -121,6 +124,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                     }
                                     //Calculate the score for redis bestTimestamp - 2Years * score
                                     var score = parseInt(progress.bestKillTimestamp / 1000, 10) - (3600 * 24 * 365 * 2 * preScore);
+
                                     async.parallel([
                                         function (callback) {
                                             rankModel.upsert(raid.tier, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
@@ -131,10 +135,26 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                             rankModel.upsert(raid.tier + "_" + guildProgress.region, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
                                                 callback(error);
                                             });
+                                        },
+                                        function (callback) {
+                                            realmModel.findOne({
+                                                region: guildProgress.region,
+                                                name: guildProgress.realm
+                                            }, {connected_realms: 1}, function (error, realm) {
+                                                if (realm) {
+                                                    rankModel.upsert(raid.tier + "_" + guildProgress.region + "_" + realm.connected_realms.join('_'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                        callback(error);
+                                                    });
+                                                } else {
+                                                    logger.warn("Realm %s-%s not found", guildProgress.region, guildProgress.realm);
+                                                    callback(error);
+                                                }
+                                            });
                                         }
                                     ], function (error) {
                                         callback(error);
                                     });
+
                                 } else {
                                     callback();
                                 }

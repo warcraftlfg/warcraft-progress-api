@@ -3,7 +3,7 @@
     "clientID": "your clientID"
   },
   "database": {
-    "mongo": "mongodb://localhost/warcraft-progress",
+    "mongo": "mongodb://localhost/warcraft-lfg",
     "redis": "redis://localhost"
   },
   "logger": {
@@ -14,7 +14,8 @@
     "eu",
     "kr",
     "tw",
-    "us"
+    "us",
+    "cn"
   ],
   "priorities": [
     10,

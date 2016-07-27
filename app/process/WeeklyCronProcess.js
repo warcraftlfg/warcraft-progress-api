@@ -15,34 +15,43 @@ function WeeklyCronProcess() {
 
 WeeklyCronProcess.prototype.runCron = function () {
     var logger = applicationStorage.logger;
+    var config = applicationStorage.config;
 
-    async.waterfall([
-        function(callback){
-            //Load all guild in progress
-            rankModel.getRanking("18",0,999999,function(error,ranking){
-                callback(error,ranking);
-            });
-        },
-        function(ranking,callback) {
-            async.forEachSeries(ranking,function(guildStr,callback){
-                var guildArray = guildStr.split('-');
-                updateModel.insert("wp_gu", guildArray[0], guildArray[1], guildArray[2], 3, function (error) {
-                    logger.info("Insert guild %s-%s-%s to update with priority 3", guildArray[0], guildArray[1], guildArray[2]);
-                    if(error){
-                        logger.error(error.message);
-                    }
+    async.forEach(config.progress.raids,function(raid,callback){
+        async.waterfall([
+            function(callback){
+                //Load all guild in progress
+                rankModel.getRanking(raid.tier,0,999999,function(error,ranking){
+                    callback(error,ranking);
+                });
+            },
+            function(ranking,callback) {
+                async.forEachSeries(ranking,function(guildStr,callback){
+                    var guildArray = guildStr.split('-');
+                    updateModel.insert("wp_gu", guildArray[0], guildArray[1], guildArray[2], 3, function (error) {
+                        logger.info("Insert guild %s-%s-%s to update with priority 3", guildArray[0], guildArray[1], guildArray[2]);
+                        if(error){
+                            logger.error(error.message);
+                        }
+                        callback();
+                    });
+                },function(){
                     callback();
                 });
-            },function(){
-                callback();
-            });
-        }
-    ],function(error){
+            }
+        ],function(error){
+            if (error){
+                logger.error(error.message);
+            }
+            callback();
+        });
+    },function(error){
         if (error){
             logger.error(error.message);
         }
         process.exit();
     });
+
 
 };
 

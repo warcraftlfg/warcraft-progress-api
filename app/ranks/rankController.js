@@ -4,6 +4,8 @@
 var async = require("async");
 var applicationStorage = process.require("core/applicationStorage.js");
 var rankModel = process.require("ranks/rankModel.js");
+var realmModel = process.require("realms/realmModel.js");
+var guildModel = process.require("guilds/guildModel.js");
 
 module.exports.getRank = function (req, res, next) {
 
@@ -20,6 +22,21 @@ module.exports.getRank = function (req, res, next) {
             rankModel.getRank(req.params.tier + "_" + req.params.region, req.params.region, req.params.realm, req.params.name, function (error, rank) {
                 callback(error, rank)
             });
+        },
+        realm: function (callback) {
+            realmModel.findOne({
+                region: req.params.region,
+                name: req.params.realm
+            }, {connected_realms: 1}, function (error, realm) {
+                if (realm) {
+                    rankModel.getRank(req.params.tier + "_" + req.params.region + "_" + realm.connected_realms.join('_'), req.params.region, req.params.realm, req.params.name, function (error, rank) {
+                        callback(error, rank)
+                    });
+                } else {
+                    logger.warn("Realm %s-%s not found", req.params.region, req.params.realm);
+                    callback(error);
+                }
+            });
         }
     }, function (error, result) {
         if (error) {
@@ -28,6 +45,8 @@ module.exports.getRank = function (req, res, next) {
         } else if (result.world !== null && result.region != null) {
             result.world++;
             result.region++;
+            if (result.realm != null)
+                result.realm++;
             res.json(result);
         } else {
             next();
@@ -59,12 +78,34 @@ module.exports.getRanking = function (req, res, next) {
         end = start + limit;
     }
 
-    var key = req.params.tier;
-    if (req.params.region) {
-        key = req.params.tier + "_" + req.params.region;
-    }
-
-    rankModel.getRanking(key, start, end, function (error, ranking) {
+    async.waterfall([
+        function (callback) {
+            var key = req.params.tier;
+            if (req.params.realm && req.params.region) {
+                realmModel.findOne({
+                    region: req.params.region,
+                    name: req.params.realm
+                }, {connected_realms: 1}, function (error, realm) {
+                    if (realm) {
+                        key = req.params.tier + "_" + req.params.region + "_" + realm.connected_realms.join('_');
+                        callback(error, key);
+                    } else {
+                        callback(new Error("Realm %s-%s not found", req.params.region, req.params.realm));
+                    }
+                });
+            } else if (req.params.region) {
+                key = req.params.tier + "_" + req.params.region;
+                callback(null, key);
+            } else {
+                callback(null, key);
+            }
+        },
+        function (key, callback) {
+            rankModel.getRanking(key, start, end, function (error, ranking) {
+                callback(error, ranking);
+            });
+        }
+    ], function (error, ranking) {
         if (error) {
             logger.error(error.message);
             res.status(500).send(error.message);
@@ -73,9 +114,17 @@ module.exports.getRanking = function (req, res, next) {
             var counter = 1;
             async.each(ranking, function (rank, callback) {
                 var rankArray = rank.split('-');
-                finalRanking[start + counter] = {region: rankArray[0], realm: rankArray[1], name: rankArray[2]};
-                counter++;
-                callback();
+
+                //GET GUILD SIDE and add it
+                guildModel.getSide(rankArray[0],rankArray[1],rankArray[2],function(error,guild){
+                    if(guild==null){
+                        guild = {bnet:{side:2}};
+                    }
+                    finalRanking[start + counter] = {region: rankArray[0], realm: rankArray[1], name: rankArray[2], side: guild.bnet.side};
+                    counter++;
+                    callback();
+                });
+
             }, function () {
                 res.json(finalRanking);
             });

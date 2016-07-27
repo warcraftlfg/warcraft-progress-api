@@ -5,7 +5,7 @@ var async = require("async");
 var applicationStorage = process.require("core/applicationStorage.js");
 var updateModel = process.require("updates/updateModel.js");
 var updateService = process.require("updates/updateService.js");
-var guildModel = process.require("guilds/guildModel.js");
+var guildProgressModel = process.require("guilds/guildProgressModel.js");
 var bnetAPI = process.require("core/api/bnet.js");
 
 /**
@@ -63,7 +63,7 @@ AuctionUpdateProcess.prototype.updateAuction = function () {
         },
         function (region, character, callback) {
             //Get Guild
-            guildModel.find({region: region, realm: character.guild.realm, name: character.guild.name}, {
+            guildProgressModel.find({region: region, realm: character.guild.realm, name: character.guild.name}, {
                 region: 1,
                 realm: 1,
                 name: 1,

@@ -8,5 +8,6 @@ var rankController = process.require("ranks/rankController.js");
 router.get('/ranks/:tier/:region/:realm/:name', rankController.getRank);
 router.get('/ranks/:tier', rankController.getRanking);
 router.get('/ranks/:tier/:region', rankController.getRanking);
+router.get('/ranks/:tier/:region/:realm', rankController.getRanking);
 
 module.exports = router;
