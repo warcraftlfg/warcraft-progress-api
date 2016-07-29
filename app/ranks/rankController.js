@@ -117,10 +117,10 @@ module.exports.getRanking = function (req, res, next) {
 
                 //GET GUILD SIDE and add it
                 guildModel.getSide(rankArray[0],rankArray[1],rankArray[2],function(error,guild){
-                    if(guild && guild.bnet==null ){
-                        guild = {bnet:{side:2}};
+                    finalRanking[start + counter] = {region: rankArray[0], realm: rankArray[1], name: rankArray[2]};
+                    if(guild && guild.bnet && guild.bnet.side ){
+                        finalRanking[start + counter]["side"] = guild.bnet.side;
                     }
-                    finalRanking[start + counter] = {region: rankArray[0], realm: rankArray[1], name: rankArray[2], side: guild.bnet.side};
                     counter++;
                     callback();
                 });
