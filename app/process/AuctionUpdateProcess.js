@@ -5,7 +5,7 @@ var async = require("async");
 var applicationStorage = process.require("core/applicationStorage.js");
 var updateModel = process.require("updates/updateModel.js");
 var updateService = process.require("updates/updateService.js");
-var guildProgressModel = process.require("guilds/guildProgressModel.js");
+var guildProgressModel = process.require("guildProgress/guildProgressModel.js");
 var bnetAPI = process.require("core/api/bnet.js");
 
 /**
