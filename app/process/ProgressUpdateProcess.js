@@ -108,7 +108,6 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
 
                                 });
                             }, function (progress, callback) {
-                                progress.bestKillTimestamp = 1;
                                 if (progress.bestKillTimestamp) {
                                     logger.verbose("Update Score for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
 
