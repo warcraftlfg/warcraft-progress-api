@@ -130,9 +130,7 @@ module.exports.getRanking = function (req, res, next) {
                     function(callback){
                         //GET GUILD Progress and add it
                         var projection = {};
-                        projection["progress.tier_"+req.params.tier+".normalCount"] = 1;
-                        projection["progress.tier_"+req.params.tier+".heroicCount"] = 1;
-                        projection["progress.tier_"+req.params.tier+".mythicCount"] = 1;
+                        projection["progress.tier_"+req.params.tier] = 1;
 
                         guildProgressModel.find({
                             region: rankArray[0],
