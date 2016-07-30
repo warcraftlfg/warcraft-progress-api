@@ -6,6 +6,7 @@ var applicationStorage = process.require("core/applicationStorage.js");
 var rankModel = process.require("ranks/rankModel.js");
 var realmModel = process.require("realms/realmModel.js");
 var guildModel = process.require("guilds/guildModel.js");
+var guildProgressModel = process.require("guildProgress/guildModel.js");
 
 module.exports.getRank = function (req, res, next) {
 
@@ -115,15 +116,41 @@ module.exports.getRanking = function (req, res, next) {
             async.forEachSeries(ranking, function (rank, callback) {
                 var rankArray = rank.split('-');
 
-                //GET GUILD SIDE and add it
-                guildModel.getSide(rankArray[0],rankArray[1],rankArray[2],function(error,guild){
-                    finalRanking[start + counter] = {region: rankArray[0], realm: rankArray[1], name: rankArray[2]};
-                    if(guild && guild.bnet && guild.bnet.side!=null ){
-                        finalRanking[start + counter]["side"] = guild.bnet.side;
+                finalRanking[start + counter] = {region: rankArray[0], realm: rankArray[1], name: rankArray[2]};
+                async.parallel([
+                    function(callback){
+                        //GET GUILD SIDE and add it
+                        guildModel.getSide(rankArray[0],rankArray[1],rankArray[2],function(error,guild){
+                            if(guild && guild.bnet && guild.bnet.side!=null ){
+                                finalRanking[start + counter]["side"] = guild.bnet.side;
+                            }
+                            callback(error);
+                        });
+                    },
+                    function(callback){
+                        //GET GUILD Progress and add it
+                        var projection = {};
+                        projection["progress.tier_"+req.params.tier+".normalCount"] = 1;
+                        projection["progress.tier_"+req.params.tier+".heroicCount"] = 1;
+                        projection["progress.tier_"+req.params.tier+".mythicCount"] = 1;
+
+                        guildProgressModel.find({
+                            region: req.params.region,
+                            realm: req.params.realm,
+                            name: req.params.name
+                        }, projection, function (error, guilds) {
+
+                            if (guilds && guilds.length > 0 && guilds[0]['progress'] && guilds[0]['progress']["tier_"+req.params.tier]) {
+                                finalRanking[start + counter]["progress"] = guilds[0];
+                            }
+                            callback(error);
+
+                        });
                     }
+                ],function(error){
                     counter++;
-                    callback();
-                });
+                    callback(error);
+                })
 
             }, function () {
                 res.json(finalRanking);
