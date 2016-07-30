@@ -84,7 +84,8 @@ module.exports.getKills = function (url, callback) {
                     logger.info("Parsing error, trying CN");
                     try {
                         var name = $('h1').text().match("“(.*)” WoW Guild")[1];
-                        var realm = armoryUrl.match('www.battlenet.com.cn/wow/guild/(.*)/(.*)/')[1];
+                        var realm = $('.realm').text().substring(3);
+                        //var realm = armoryUrl.match('www.battlenet.com.cn/wow/guild/(.*)/(.*)/')[1];
                         var region = armoryUrl.match('http://www.battlenet.com.(.*)/wow/guild/')[1];
                     } catch (e) {
                         logger.error("Error on page parsing %s", url);
