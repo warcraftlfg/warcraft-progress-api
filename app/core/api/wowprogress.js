@@ -99,20 +99,21 @@ module.exports.getKills = function (url, callback) {
                         logger.verbose("Insert GuildProgress to update %s-%s-%s with priority %s", region, realm, name, 3);
                         callback(true);
                     });
-                }else{
+                }else {
                     //Speed don't parse other ...
-                    callback(true);
-                }
+                    return callback(true); //TO REMOVE TO IMPORT OTHERS
 
-                bnetAPI.getGuild(region, realm, name, [], function (error, guild) {
-                    if (!guild || !guild.realm || !guild.name) {
-                        logger.warn("Bnet return empty guild %s-%s-%s, skip it", region, realm, name);
+
+                    bnetAPI.getGuild(region, realm, name, [], function (error, guild) {
+                        if (!guild || !guild.realm || !guild.name) {
+                            logger.warn("Bnet return empty guild %s-%s-%s, skip it", region, realm, name);
                             callback(true);
 
-                    } else {
-                        callback(error, $, region, guild.realm, guild.name);
-                    }
-                });
+                        } else {
+                            callback(error, $, region, guild.realm, guild.name);
+                        }
+                    });
+                }
 
 
             }
