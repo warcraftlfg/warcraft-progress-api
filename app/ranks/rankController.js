@@ -127,7 +127,7 @@ module.exports.getRanking = function (req, res, next) {
                             if (guild && guild.bnet && guild.bnet.side != null) {
                                 finalRanking[start + counter]["side"] = guild.bnet.side;
                             }
-                            if (guild && guild.bnet && guild.ad.lfg == true) {
+                            if (guild && guild.ad && guild.ad.lfg == true) {
                                 finalRanking[start + counter]["lfg"] = true;
                             }
                             callback(error);
