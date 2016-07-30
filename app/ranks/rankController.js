@@ -112,7 +112,7 @@ module.exports.getRanking = function (req, res, next) {
         } else if (ranking) {
             var finalRanking = {};
             var counter = 1;
-            async.each(ranking, function (rank, callback) {
+            async.forEachSeries(ranking, function (rank, callback) {
                 var rankArray = rank.split('-');
 
                 //GET GUILD SIDE and add it

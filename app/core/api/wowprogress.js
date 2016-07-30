@@ -6,6 +6,7 @@ var _ = require('lodash');
 var cheerio = require("cheerio");
 var async = require("async");
 var bnetAPI = process.require("core/api/bnet.js");
+var updateModel = process.require("updates/updateModel.js");
 
 //Configuration
 var applicationStorage = process.require("core/applicationStorage.js");
@@ -93,8 +94,17 @@ module.exports.getKills = function (url, callback) {
 
                 bnetAPI.getGuild(region, realm, name, [], function (error, guild) {
                     if (!guild || !guild.realm || !guild.name) {
-                        logger.warn("Bnet return empty guild %s-%s-%s, skip it", region, realm, name);
-                        callback(true);
+                        logger.warn("Bnet return empty guild so try to update %s-%s-%s, skip it", region, realm, name);
+
+                        //Bug on chinese ...
+                        if (region == "cn") {
+                            updateModel.insert("wp_pu", region, realm, name, 3, function () {
+                                logger.verbose("Insert GuildProgress to update %s-%s-%s with priority %s", region, realm, name, 3);
+                                callback(true);
+                            });
+                        } else {
+                            callback(true);
+                        }
                     } else {
                         callback(error, $, region, guild.realm, guild.name);
                     }
@@ -148,14 +158,12 @@ module.exports.getKills = function (url, callback) {
 
 
                     if (isNaN(timestamp)) {
-                        timestamp = new Date(date.substring(1,date.length) + " GMT+0000").getTime();
+                        timestamp = new Date(date.substring(1, date.length) + " GMT+0000").getTime();
                     }
 
                     if (isNaN(timestamp) || timestamp < 1388534400000) {
                         timestamp = parseInt($(this).parent().next().find('.datetime').attr('data-ts'), 10) * 1000;
                     }
-
-
 
 
                     //Fix incorrect kill ...
