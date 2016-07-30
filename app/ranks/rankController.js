@@ -6,7 +6,7 @@ var applicationStorage = process.require("core/applicationStorage.js");
 var rankModel = process.require("ranks/rankModel.js");
 var realmModel = process.require("realms/realmModel.js");
 var guildModel = process.require("guilds/guildModel.js");
-var guildProgressModel = process.require("guildProgress/guildModel.js");
+var guildProgressModel = process.require("guildProgress/guildProgressModel.js");
 
 module.exports.getRank = function (req, res, next) {
 
