@@ -93,19 +93,22 @@ module.exports.getKills = function (url, callback) {
                     }
                 }
 
+                //For Chinese, force update only // PATCH
+                if (region == "cn") {
+                    updateModel.insert("wp_pu", region, realm, name, 3, function () {
+                        logger.verbose("Insert GuildProgress to update %s-%s-%s with priority %s", region, realm, name, 3);
+                        callback(true);
+                    });
+                }else{
+                    //Speed don't parse other ...
+                    callback(true);
+                }
+
                 bnetAPI.getGuild(region, realm, name, [], function (error, guild) {
                     if (!guild || !guild.realm || !guild.name) {
-                        logger.warn("Bnet return empty guild so try to update %s-%s-%s, skip it", region, realm, name);
-
-                        //Bug on chinese ...
-                        if (region == "cn") {
-                            updateModel.insert("wp_pu", region, realm, name, 3, function () {
-                                logger.verbose("Insert GuildProgress to update %s-%s-%s with priority %s", region, realm, name, 3);
-                                callback(true);
-                            });
-                        } else {
+                        logger.warn("Bnet return empty guild %s-%s-%s, skip it", region, realm, name);
                             callback(true);
-                        }
+
                     } else {
                         callback(error, $, region, guild.realm, guild.name);
                     }
