@@ -135,13 +135,13 @@ module.exports.getRanking = function (req, res, next) {
                         projection["progress.tier_"+req.params.tier+".mythicCount"] = 1;
 
                         guildProgressModel.find({
-                            region: req.params.region,
-                            realm: req.params.realm,
-                            name: req.params.name
+                            region: rankArray[0],
+                            realm: rankArray[1],
+                            name: rankArray[2]
                         }, projection, function (error, guilds) {
 
                             if (guilds && guilds.length > 0 && guilds[0]['progress'] && guilds[0]['progress']["tier_"+req.params.tier]) {
-                                finalRanking[start + counter]["progress"] = guilds[0];
+                                finalRanking[start + counter]["progress"] = guilds[0]["progress"]["tier_"+req.params.tier];
                             }
                             callback(error);
 
