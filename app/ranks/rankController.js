@@ -46,8 +46,9 @@ module.exports.getRank = function (req, res, next) {
         } else if (result.world !== null && result.region != null) {
             result.world++;
             result.region++;
-            if (result.realm != null)
+            if (result.realm != null) {
                 result.realm++;
+            }
             res.json(result);
         } else {
             next();
@@ -70,11 +71,13 @@ module.exports.getRanking = function (req, res, next) {
     if (req.query && req.query.limit) {
         var limit = parseInt(req.query.limit, 10);
 
-        if (limit < 0)
+        if (limit < 0) {
             limit = 500;
+        }
 
-        if (limit > 1000)
+        if (limit > 1000) {
             limit = 1000;
+        }
 
         end = start + limit;
     }
@@ -118,19 +121,22 @@ module.exports.getRanking = function (req, res, next) {
 
                 finalRanking[start + counter] = {region: rankArray[0], realm: rankArray[1], name: rankArray[2]};
                 async.parallel([
-                    function(callback){
+                    function (callback) {
                         //GET GUILD SIDE and add it
-                        guildModel.getSide(rankArray[0],rankArray[1],rankArray[2],function(error,guild){
-                            if(guild && guild.bnet && guild.bnet.side!=null ){
+                        guildModel.getGuildInfo(rankArray[0], rankArray[1], rankArray[2], function (error, guild) {
+                            if (guild && guild.bnet && guild.bnet.side != null) {
                                 finalRanking[start + counter]["side"] = guild.bnet.side;
+                            }
+                            if (guild && guild.bnet && guild.ad.lfg == true) {
+                                finalRanking[start + counter]["lfg"] = true;
                             }
                             callback(error);
                         });
                     },
-                    function(callback){
+                    function (callback) {
                         //GET GUILD Progress and add it
                         var projection = {};
-                        projection["progress.tier_"+req.params.tier] = 1;
+                        projection["progress.tier_" + req.params.tier] = 1;
 
                         guildProgressModel.find({
                             region: rankArray[0],
@@ -138,14 +144,14 @@ module.exports.getRanking = function (req, res, next) {
                             name: rankArray[2]
                         }, projection, function (error, guilds) {
 
-                            if (guilds && guilds.length > 0 && guilds[0]['progress'] && guilds[0]['progress']["tier_"+req.params.tier]) {
-                                finalRanking[start + counter]["progress"] = guilds[0]["progress"]["tier_"+req.params.tier];
+                            if (guilds && guilds.length > 0 && guilds[0]['progress'] && guilds[0]['progress']["tier_" + req.params.tier]) {
+                                finalRanking[start + counter]["progress"] = guilds[0]["progress"]["tier_" + req.params.tier];
                             }
                             callback(error);
 
                         });
                     }
-                ],function(error){
+                ], function (error) {
                     counter++;
                     callback(error);
                 })
