@@ -60,6 +60,8 @@ module.exports.getRank = function (req, res, next) {
 module.exports.getRanking = function (req, res, next) {
 
     var logger = applicationStorage.logger;
+    var config = applicationStorage.config;
+
     logger.info("%s %s %s %s", req.headers['x-forwarded-for'] || req.connection.remoteAddress, req.method, req.path, JSON.stringify(req.params));
 
     var start = 0;
@@ -136,8 +138,17 @@ module.exports.getRanking = function (req, res, next) {
                     function (callback) {
                         //GET GUILD Progress and add it
                         var projection = {};
-                        projection["progress.tier_" + req.params.tier] = 1;
 
+                        config.progress.raids.forEach(function (raid) {
+                            if (raid.tier == parseInt(req.params.tier, 10)) {
+                                var difficulties = ["normal", "heroic", "mythic"];
+                                difficulties.forEach(function (difficulty) {
+                                    raid.bosses.forEach(function (boss) {
+                                        projection["progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name + ".timestamp"] = 1;
+                                    });
+                                });
+                            }
+                        });
                         guildProgressModel.find({
                             region: rankArray[0],
                             realm: rankArray[1],
@@ -150,6 +161,8 @@ module.exports.getRanking = function (req, res, next) {
                             callback(error);
 
                         });
+
+
                     }
                 ], function (error) {
                     counter++;

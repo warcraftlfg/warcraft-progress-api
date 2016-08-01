@@ -21,7 +21,7 @@ module.exports.find = function (criteria, projection, sort, limit, hint, callbac
         collection.find(criteria).toArray(function (error, guilds) {
             callback(error, guilds);
         });
-    }else  if (hint == undefined && limit == undefined && callback == undefined) {
+    } else if (hint == undefined && limit == undefined && callback == undefined) {
         callback = sort;
         collection.find(criteria, projection).toArray(function (error, guilds) {
             callback(error, guilds);
@@ -54,7 +54,6 @@ module.exports.find = function (criteria, projection, sort, limit, hint, callbac
 module.exports.upsert = function (region, realm, name, obj, callback) {
 
     var guild = {};
-
 
 
     if (obj.progress) {
