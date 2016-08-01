@@ -144,7 +144,7 @@ module.exports.getRanking = function (req, res, next) {
                                 var difficulties = ["normal", "heroic", "mythic"];
                                 difficulties.forEach(function (difficulty) {
                                     raid.bosses.forEach(function (boss) {
-                                        projection["progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name + ".timestamp"] = 1;
+                                        projection["progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name + ".timestamps"] = 1;
                                     });
                                 });
                             }
