@@ -85,13 +85,12 @@ module.exports.upsert = function (region, realm, name, obj, callback) {
 };
 
 module.exports.aggregate = function (criteria, project, callback) {
-    var config = applicationStorage.config;
     var collection = applicationStorage.mongo.collection("guilds_progress");
-
     collection.aggregate([
         {
             $match: criteria
-        }, {
+        },
+        {
             $project: project
         }
     ], function (error, results) {
