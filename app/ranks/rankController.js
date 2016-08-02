@@ -169,8 +169,13 @@ module.exports.getRanking = function (req, res, next) {
                     callback(error);
                 })
 
-            }, function () {
-                res.json(finalRanking);
+            }, function (error) {
+                if (error) {
+                    logger.error(error.message);
+                    res.status(500).send(error.message)
+                } else {
+                    res.json(finalRanking);
+                }
             });
         } else {
             next();
