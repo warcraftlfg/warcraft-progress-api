@@ -143,7 +143,7 @@ module.exports.getRanking = function (req, res, next) {
                                 var difficulties = ["normal", "heroic", "mythic"];
                                 difficulties.forEach(function (difficulty) {
                                     raid.bosses.forEach(function (boss) {
-                                        project["progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name] = {$size: "$progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name + ".timestamps"};
+                                        project["progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name] = {$ifNull:[{$size: "$progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name + ".timestamps"},0]};
                                     });
                                 });
                             }
@@ -156,7 +156,6 @@ module.exports.getRanking = function (req, res, next) {
                         guildProgressModel.aggregate({region:rankArray[0],realm:rankArray[1],name:rankArray[2]},project,function(error,result){
 
                             if (result && result.length > 0&& result[0]['progress'] && result[0]['progress']["tier_" + req.params.tier]) {
-
                                 finalRanking[start + counter]["progress"] = result[0]["progress"]["tier_" + req.params.tier];
                             }
                             callback(error);
