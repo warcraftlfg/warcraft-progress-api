@@ -74,11 +74,11 @@ module.exports.getRanking = function (req, res, next) {
         var limit = parseInt(req.query.limit, 10);
 
         if (limit < 0) {
-            limit = 500;
+            limit = 50;
         }
 
-        if (limit > 1000) {
-            limit = 1000;
+        if (limit > 50) {
+            limit = 50;
         }
 
         end = start + limit;
