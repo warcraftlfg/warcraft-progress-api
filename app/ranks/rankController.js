@@ -137,33 +137,29 @@ module.exports.getRanking = function (req, res, next) {
                     },
                     function (callback) {
                         //GET GUILD Progress and add it
-                        var projection = {};
-
+                        var project = {};
                         config.progress.raids.forEach(function (raid) {
                             if (raid.tier == parseInt(req.params.tier, 10)) {
                                 var difficulties = ["normal", "heroic", "mythic"];
                                 difficulties.forEach(function (difficulty) {
                                     raid.bosses.forEach(function (boss) {
-                                        projection["progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name + ".timestamps"] = 1;
+                                        project["progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name] = {$size: "$progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name + ".timestamps"};
                                     });
                                 });
                             }
                         });
-                        projection["progress.tier_"+req.params.tier+".normalCount"] = 1;
-                        projection["progress.tier_"+req.params.tier+".heroicCount"] = 1;
-                        projection["progress.tier_"+req.params.tier+".mythicCount"] = 1;
+                        project["progress.tier_" + req.params.tier + ".normalCount"] = 1;
+                        project["progress.tier_" + req.params.tier + ".heroicCount"] = 1;
+                        project["progress.tier_" + req.params.tier + ".mythicCount"] = 1;
 
-                        guildProgressModel.find({
-                            region: rankArray[0],
-                            realm: rankArray[1],
-                            name: rankArray[2]
-                        }, projection, function (error, guilds) {
 
-                            if (guilds && guilds.length > 0 && guilds[0]['progress'] && guilds[0]['progress']["tier_" + req.params.tier]) {
-                                finalRanking[start + counter]["progress"] = guilds[0]["progress"]["tier_" + req.params.tier];
+                        guildProgressModel.aggregate({region:rankArray[0],realm:rankArray[1],name:rankArray[2]},project,function(error,result){
+
+                            if (result && result.length > 0&& result[0]['progress'] && result[0]['progress']["tier_" + req.params.tier]) {
+
+                                finalRanking[start + counter]["progress"] = result[0]["progress"]["tier_" + req.params.tier];
                             }
                             callback(error);
-
                         });
 
 
