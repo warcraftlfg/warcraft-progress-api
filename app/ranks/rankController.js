@@ -81,7 +81,7 @@ module.exports.getRanking = function (req, res, next) {
             limit = 50;
         }
 
-        end = start + limit;
+        end = start + limit -1;
     }
 
     async.waterfall([
