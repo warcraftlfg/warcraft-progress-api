@@ -149,6 +149,10 @@ module.exports.getRanking = function (req, res, next) {
                                 });
                             }
                         });
+                        projection["progress.tier_"+req.params.tier+".normalCount"] = 1;
+                        projection["progress.tier_"+req.params.tier+".heroicCount"] = 1;
+                        projection["progress.tier_"+req.params.tier+".mythicCount"] = 1;
+
                         guildProgressModel.find({
                             region: rankArray[0],
                             realm: rankArray[1],
