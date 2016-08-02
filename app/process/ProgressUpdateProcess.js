@@ -50,7 +50,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                 });
                             },
                             function (result, callback) {
-                                var progress = {};
+                                var progress = {normalCount:0,heroicCount:0,mythicCount:0};
                                 var bestNormalKillTimestamp = 0;
                                 var bestHeroicKillTimestamp = 0;
                                 var bestMythicKillTimestamp = 0;
