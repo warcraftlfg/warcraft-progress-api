@@ -121,6 +121,12 @@ module.exports.getRanking = function (req, res, next) {
             async.forEachSeries(ranking, function (rank, callback) {
                 var rankArray = rank.split('-');
 
+                //Fix realm with - ...
+                if(rankArray.length ==4){
+                    rankArray[1] = rankArray[1]+"-"+rankArray[2];
+                    rankArray[2] = rankArray[3];
+                }
+
                 finalRanking[start + counter] = {region: rankArray[0], realm: rankArray[1], name: rankArray[2]};
                 async.parallel([
                     function (callback) {
