@@ -28,15 +28,36 @@ WeeklyCronProcess.prototype.runCron = function () {
             function(ranking,callback) {
                 async.forEachSeries(ranking,function(guildStr,callback){
                     var guildArray = guildStr.split('-');
-                    updateModel.insert("wp_gu", guildArray[0], guildArray[1], guildArray[2], 3, function (error) {
-                        logger.info("Insert guild %s-%s-%s to update with priority 3", guildArray[0], guildArray[1], guildArray[2]);
-                        if(error){
-                            logger.error(error.message);
+
+                    //Fix realm with - ... silly choice ...
+                    if(guildArray.length ==4){
+                        guildArray[1] = guildArray[1]+"-"+guildArray[2];
+                        guildArray[2] = guildArray[3];
+                    }
+                    async.parallel([
+                        function(callback){
+                            updateModel.insert("wp_gu", guildArray[0], guildArray[1], guildArray[2], 3, function (error) {
+                                logger.info("Insert guild progress %s-%s-%s to update with priority 3", guildArray[0], guildArray[1], guildArray[2]);
+                                if(error){
+                                    logger.error(error.message);
+                                }
+                                callback(error);
+                            });
+                        },
+                        function(callback){
+                            updateModel.insert("gu", guildArray[0], guildArray[1], guildArray[2], 0, function (error) {
+                                logger.info("Insert guild %s-%s-%s to update with priority 0", guildArray[0], guildArray[1], guildArray[2]);
+                                if(error){
+                                    logger.error(error.message);
+                                }
+                                callback(error);
+                            });
                         }
-                        callback();
+                    ],function(error){
+                        callback(error)
                     });
-                },function(){
-                    callback();
+                },function(error){
+                    callback(error);
                 });
             }
         ],function(error){
