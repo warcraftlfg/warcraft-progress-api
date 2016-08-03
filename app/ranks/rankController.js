@@ -28,8 +28,8 @@ module.exports.getRank = function (req, res, next) {
             realmModel.findOne({
                 region: req.params.region,
                 name: req.params.realm
-            }, {connected_realms: 1, locale: 1}, function (error, realm) {
-                if (realm) {
+            }, {connected_realms: 1, "bnet.locale": 1}, function (error, realm) {
+                if (realm && realm.connected_realms && realm.bnet && realm.bnet.locale) {
                     async.parallel({
                         realm: function (callback) {
                             rankModel.getRank(req.params.tier + "_" + req.params.region + "_" + realm.connected_realms.join('_'), req.params.region, req.params.realm, req.params.name, function (error, rank) {
@@ -37,7 +37,7 @@ module.exports.getRank = function (req, res, next) {
                             });
                         },
                         locale: function (callback) {
-                            rankModel.getRank(req.params.tier + "_" + realm.locale, req.params.region, req.params.realm, req.params.name, function (error, rank) {
+                            rankModel.getRank(req.params.tier + "_" + realm.bnet.locale, req.params.region, req.params.realm, req.params.name, function (error, rank) {
                                 callback(error, rank)
                             });
                         }

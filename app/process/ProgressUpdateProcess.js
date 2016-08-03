@@ -139,8 +139,8 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                             realmModel.findOne({
                                                 region: guildProgress.region,
                                                 name: guildProgress.realm
-                                            }, {connected_realms: 1, locale: 1}, function (error, realm) {
-                                                if (realm) {
+                                            }, {connected_realms: 1, "bnet.locale": 1}, function (error, realm) {
+                                                if (realm && realm.connected_realms && realm.bnet && realm.bnet.locale) {
                                                     async.parallel([
                                                         function (callback) {
                                                             rankModel.upsert(raid.tier + "_" + guildProgress.region + "_" + realm.connected_realms.join('_'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
@@ -148,9 +148,9 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                                             });
                                                         },
                                                         function (callback) {
-                                                            rankModel.upsert(raid.tier + "_" + realm.locale, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
-                                                                callback(error);
-                                                            });
+                                                                rankModel.upsert(raid.tier + "_" + realm.bnet.locale, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                                    callback(error);
+                                                                });
                                                         }
                                                     ], function (error) {
                                                         callback(error)
