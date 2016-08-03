@@ -24,15 +24,27 @@ module.exports.getRank = function (req, res, next) {
                 callback(error, rank)
             });
         },
-        realm: function (callback) {
+        realmlocale: function (callback) {
             realmModel.findOne({
                 region: req.params.region,
                 name: req.params.realm
-            }, {connected_realms: 1}, function (error, realm) {
+            }, {connected_realms: 1, locale: 1}, function (error, realm) {
                 if (realm) {
-                    rankModel.getRank(req.params.tier + "_" + req.params.region + "_" + realm.connected_realms.join('_'), req.params.region, req.params.realm, req.params.name, function (error, rank) {
-                        callback(error, rank)
+                    async.parallel({
+                        realm: function (callback) {
+                            rankModel.getRank(req.params.tier + "_" + req.params.region + "_" + realm.connected_realms.join('_'), req.params.region, req.params.realm, req.params.name, function (error, rank) {
+                                callback(error, rank)
+                            });
+                        },
+                        locale: function (callback) {
+                            rankModel.getRank(req.params.tier + "_" + realm.locale, req.params.region, req.params.realm, req.params.name, function (error, rank) {
+                                callback(error, rank)
+                            });
+                        }
+                    }, function (error, result) {
+                        callback(error, result);
                     });
+
                 } else {
                     logger.warn("Realm %s-%s not found", req.params.region, req.params.realm);
                     callback(error);
@@ -46,8 +58,10 @@ module.exports.getRank = function (req, res, next) {
         } else if (result.world !== null && result.region != null) {
             result.world++;
             result.region++;
-            if (result.realm != null) {
-                result.realm++;
+            if (result.realmlocale != null) {
+                result.realm = result.realmlocale.realm + 1;
+                result.locale = result.realmlocale.locale + 1;
+                delete result.realmlocale;
             }
             res.json(result);
         } else {
@@ -81,7 +95,7 @@ module.exports.getRanking = function (req, res, next) {
             limit = 50;
         }
 
-        end = start + limit -1;
+        end = start + limit - 1;
     }
 
     async.waterfall([
@@ -101,6 +115,9 @@ module.exports.getRanking = function (req, res, next) {
                 });
             } else if (req.params.region) {
                 key = req.params.tier + "_" + req.params.region;
+                callback(null, key);
+            } else if (req.params.locale) {
+                key = req.params.tier + "_" + req.params.locale;
                 callback(null, key);
             } else {
                 callback(null, key);
@@ -122,8 +139,8 @@ module.exports.getRanking = function (req, res, next) {
                 var rankArray = rank.split('-');
 
                 //Fix realm with - ...
-                if(rankArray.length ==4){
-                    rankArray[1] = rankArray[1]+"-"+rankArray[2];
+                if (rankArray.length == 4) {
+                    rankArray[1] = rankArray[1] + "-" + rankArray[2];
                     rankArray[2] = rankArray[3];
                 }
 
@@ -149,7 +166,7 @@ module.exports.getRanking = function (req, res, next) {
                                 var difficulties = ["normal", "heroic", "mythic"];
                                 difficulties.forEach(function (difficulty) {
                                     raid.bosses.forEach(function (boss) {
-                                        project["progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name] = {$size: {$ifNull:["$progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name + ".timestamps",[]]}};
+                                        project["progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name] = {$size: {$ifNull: ["$progress.tier_" + req.params.tier + "." + difficulty + "." + boss.name + ".timestamps", []]}};
                                     });
                                 });
                             }
@@ -159,9 +176,13 @@ module.exports.getRanking = function (req, res, next) {
                         project["progress.tier_" + req.params.tier + ".mythicCount"] = 1;
 
 
-                        guildProgressModel.aggregate({region:rankArray[0],realm:rankArray[1],name:rankArray[2]},project,function(error,result){
+                        guildProgressModel.aggregate({
+                            region: rankArray[0],
+                            realm: rankArray[1],
+                            name: rankArray[2]
+                        }, project, function (error, result) {
 
-                            if (result && result.length > 0&& result[0]['progress'] && result[0]['progress']["tier_" + req.params.tier]) {
+                            if (result && result.length > 0 && result[0]['progress'] && result[0]['progress']["tier_" + req.params.tier]) {
                                 finalRanking[start + counter]["progress"] = result[0]["progress"]["tier_" + req.params.tier];
                             }
                             callback(error);

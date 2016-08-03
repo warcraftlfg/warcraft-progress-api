@@ -50,7 +50,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                 });
                             },
                             function (result, callback) {
-                                var progress = {normalCount:0,heroicCount:0,mythicCount:0};
+                                var progress = {normalCount: 0, heroicCount: 0, mythicCount: 0};
                                 var bestNormalKillTimestamp = 0;
                                 var bestHeroicKillTimestamp = 0;
                                 var bestMythicKillTimestamp = 0;
@@ -139,10 +139,21 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                             realmModel.findOne({
                                                 region: guildProgress.region,
                                                 name: guildProgress.realm
-                                            }, {connected_realms: 1}, function (error, realm) {
+                                            }, {connected_realms: 1, locale: 1}, function (error, realm) {
                                                 if (realm) {
-                                                    rankModel.upsert(raid.tier + "_" + guildProgress.region + "_" + realm.connected_realms.join('_'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
-                                                        callback(error);
+                                                    async.parallel([
+                                                        function (callback) {
+                                                            rankModel.upsert(raid.tier + "_" + guildProgress.region + "_" + realm.connected_realms.join('_'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                                callback(error);
+                                                            });
+                                                        },
+                                                        function (callback) {
+                                                            rankModel.upsert(raid.tier + "_" + realm.locale, function (error) {
+                                                                callback(error);
+                                                            });
+                                                        }
+                                                    ], function (error) {
+                                                        callback(error)
                                                     });
                                                 } else {
                                                     logger.warn("Realm %s-%s not found", guildProgress.region, guildProgress.realm);
