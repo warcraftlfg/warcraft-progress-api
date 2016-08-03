@@ -39,7 +39,8 @@ module.exports.getRank = function (req, res, next) {
                         locale: function (callback) {
                             rankModel.getRank(req.params.tier + "_" + realm.bnet.locale, req.params.region, req.params.realm, req.params.name, function (error, rank) {
                                 var result = {};
-                                result[realm.bnet.locale] = rank + 1;
+                                result['rank'] = rank + 1;
+                                result['type'] = realm.bnet.locale;
                                 callback(error, result)
                             });
                         }
