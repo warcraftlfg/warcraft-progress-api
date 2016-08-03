@@ -16,12 +16,12 @@ module.exports.getRank = function (req, res, next) {
     async.parallel({
         world: function (callback) {
             rankModel.getRank(req.params.tier, req.params.region, req.params.realm, req.params.name, function (error, rank) {
-                callback(error, rank)
+                callback(error, rank + 1)
             });
         },
         region: function (callback) {
             rankModel.getRank(req.params.tier + "_" + req.params.region, req.params.region, req.params.realm, req.params.name, function (error, rank) {
-                callback(error, rank)
+                callback(error, rank + 1)
             });
         },
         realmlocale: function (callback) {
@@ -33,12 +33,14 @@ module.exports.getRank = function (req, res, next) {
                     async.parallel({
                         realm: function (callback) {
                             rankModel.getRank(req.params.tier + "_" + req.params.region + "_" + realm.connected_realms.join('_'), req.params.region, req.params.realm, req.params.name, function (error, rank) {
-                                callback(error, rank)
+                                callback(error, rank + 1)
                             });
                         },
                         locale: function (callback) {
                             rankModel.getRank(req.params.tier + "_" + realm.bnet.locale, req.params.region, req.params.realm, req.params.name, function (error, rank) {
-                                callback(error, rank)
+                                var result = {};
+                                result[realm.bnet.locale] = rank + 1;
+                                callback(error, result)
                             });
                         }
                     }, function (error, result) {
@@ -56,11 +58,9 @@ module.exports.getRank = function (req, res, next) {
             logger.error(error.message);
             res.status(500).send(error.message);
         } else if (result.world !== null && result.region != null) {
-            result.world++;
-            result.region++;
             if (result.realmlocale != null) {
-                result.realm = result.realmlocale.realm + 1;
-                result.locale = result.realmlocale.locale + 1;
+                result.realm = result.realmlocale.realm;
+                result.locale = result.realmlocale.locale;
                 delete result.realmlocale;
             }
             res.json(result);
