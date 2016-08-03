@@ -148,7 +148,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                                             });
                                                         },
                                                         function (callback) {
-                                                            rankModel.upsert(raid.tier + "_" + realm.locale, function (error) {
+                                                            rankModel.upsert(raid.tier + "_" + realm.locale, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
                                                                 callback(error);
                                                             });
                                                         }
