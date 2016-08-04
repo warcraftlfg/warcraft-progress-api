@@ -16,12 +16,20 @@ module.exports.getRank = function (req, res, next) {
     async.parallel({
         world: function (callback) {
             rankModel.getRank(req.params.tier, req.params.region, req.params.realm, req.params.name, function (error, rank) {
-                callback(error, rank + 1)
+                if (rank != null) {
+                    callback(error, rank + 1)
+                } else {
+                    callback(error, null)
+                }
             });
         },
         region: function (callback) {
             rankModel.getRank(req.params.tier + "_" + req.params.region, req.params.region, req.params.realm, req.params.name, function (error, rank) {
-                callback(error, rank + 1)
+                if (rank != null) {
+                    callback(error, rank + 1)
+                } else {
+                    callback(error, null)
+                }
             });
         },
         realmlocale: function (callback) {
@@ -33,19 +41,31 @@ module.exports.getRank = function (req, res, next) {
                     async.parallel({
                         realm: function (callback) {
                             rankModel.getRank(req.params.tier + "_" + req.params.region + "_" + realm.connected_realms.join('_'), req.params.region, req.params.realm, req.params.name, function (error, rank) {
-                                callback(error, rank + 1)
+                                if (rank != null) {
+                                    callback(error, rank + 1)
+                                } else {
+                                    callback(error, null)
+                                }
                             });
                         },
                         locale: function (callback) {
                             rankModel.getRank(req.params.tier + "_" + realm.bnet.locale, req.params.region, req.params.realm, req.params.name, function (error, rank) {
-                                var result = {};
-                                result['rank'] = rank + 1;
-                                result['type'] = realm.bnet.locale;
-                                callback(error, result)
+                                if (rank != null) {
+                                    var result = {};
+                                    result['rank'] = rank + 1;
+                                    result['type'] = realm.bnet.locale;
+                                    callback(error, result)
+                                } else {
+                                    callback(error, null)
+                                }
                             });
                         }
                     }, function (error, result) {
-                        callback(error, result);
+                        if (result.realm != null && result.locale != null) {
+                            callback(error, result);
+                        } else {
+                            callback(error, null);
+                        }
                     });
 
                 } else {
@@ -58,7 +78,7 @@ module.exports.getRank = function (req, res, next) {
         if (error) {
             logger.error(error.message);
             res.status(500).send(error.message);
-        } else if (result.world !== null && result.region != null) {
+        } else if (result && result.world !== null && result.region != null) {
             if (result.realmlocale != null) {
                 result.realm = result.realmlocale.realm;
                 result.locale = result.realmlocale.locale;
