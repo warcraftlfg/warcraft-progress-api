@@ -87,8 +87,8 @@ module.exports.getRank = function (req, res, next) {
             if (result.realmlocale != null) {
                 result.realm = result.realmlocale.realm;
                 result.locale = result.realmlocale.locale;
-                delete result.realmlocale;
             }
+            delete result.realmlocale;
             res.json(result);
         } else {
             next();
