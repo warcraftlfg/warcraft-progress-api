@@ -36,8 +36,8 @@ module.exports.getRank = function (req, res, next) {
             realmModel.findOne({
                 region: req.params.region,
                 name: req.params.realm
-            }, {connected_realms: 1, "bnet.locale": 1}, function (error, realm) {
-                if (realm && realm.connected_realms && realm.bnet && realm.bnet.locale) {
+            }, {connected_realms: 1, "bnet.locale": 1, "bnet.timezone": 1}, function (error, realm) {
+                if (realm && realm.connected_realms && realm.bnet && realm.bnet.locale && realm.bnet.timezone) {
                     async.parallel({
                         realm: function (callback) {
                             rankModel.getRank(req.params.tier + "_" + req.params.region + "_" + realm.connected_realms.join('_'), req.params.region, req.params.realm, req.params.name, function (error, rank) {
@@ -49,16 +49,21 @@ module.exports.getRank = function (req, res, next) {
                             });
                         },
                         locale: function (callback) {
-                            rankModel.getRank(req.params.tier + "_" + realm.bnet.locale, req.params.region, req.params.realm, req.params.name, function (error, rank) {
-                                if (rank != null) {
-                                    var result = {};
-                                    result['rank'] = rank + 1;
-                                    result['type'] = realm.bnet.locale;
-                                    callback(error, result)
-                                } else {
-                                    callback(error, null)
-                                }
-                            });
+                            var zoneArray = realm.bnet.timezone.split('/');
+                            if(zoneArray.length > 0 ) {
+                                rankModel.getRank(req.params.tier + "_" + realm.bnet.locale+"_"+zoneArray[0], req.params.region, req.params.realm, req.params.name, function (error, rank) {
+                                    if (rank != null) {
+                                        var result = {};
+                                        result['rank'] = rank + 1;
+                                        result['type'] = realm.bnet.locale+"_"+zoneArray[0];
+                                        callback(error, result)
+                                    } else {
+                                        callback(error, null)
+                                    }
+                                });
+                            }else {
+                                callback(error,null);
+                            }
                         }
                     }, function (error, result) {
                         if (result.realm != null && result.locale != null) {
