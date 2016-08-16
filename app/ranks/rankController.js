@@ -218,7 +218,7 @@ module.exports.getRanking = function (req, res, next) {
                     },
                     function (callback) {
                         rankModel.getRank(req.params.tier, rankArray[0], rankArray[1], rankArray[2], function (error, rank) {
-                            if (rank) {
+                            if (rank!=null) {
                                 finalRanking[start + counter]["world"] = rank + 1;
                             }
                             callback(error);
