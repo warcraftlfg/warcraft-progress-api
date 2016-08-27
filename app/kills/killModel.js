@@ -138,8 +138,8 @@ module.exports.computeProgress = function (region, realm, name, tier, callback) 
                         }
                     }
                     else if (values[idx].source === "progress") {
-                        if(values[idx].timestamp + 1000 == values[idx + 1].timestamp ){
-                            //DO nothing
+                        if(values[idx].roster ==null){
+                            //Do nothing
                         }else if (idx < values.length - 1 && values[idx].roster && values[idx].timestamp + 1000 >= values[idx + 1].timestamp && values[idx + 1].source == "progress" && values[idx + 1].roster) {
                             var rosterLength = values[idx].roster.length + values[idx + 1].roster.length;
                             if ((key.difficulty == "mythic" && rosterLength >= 11) || ((key.difficulty == "normal" || key.difficulty == "heroic") && rosterLength >= 7)) {
