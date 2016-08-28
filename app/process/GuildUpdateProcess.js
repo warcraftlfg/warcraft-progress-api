@@ -115,7 +115,7 @@ GuildUpdateProcess.prototype.updateGuild = function () {
                             });
                         },
                         function (guildsInfos, callback) {
-                            if (guildInfos == null || guildInfos.bnet == null) {
+                            if (guildInfos == null || (guildInfos && guildInfos.bnet == null)) {
                                 //Refresh guild infos
                                 updateModel.insert("gu", region, guild.realm, guild.name, 0, function () {
                                     callback(error)
