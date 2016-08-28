@@ -7,6 +7,7 @@ var updateModel = process.require("updates/updateModel.js");
 var updateService = process.require("updates/updateService.js");
 var guildService = process.require("guilds/guildService.js");
 var bnetAPI = process.require("core/api/bnet.js");
+var guildModel = process.require("guilds/guildModel.js");
 
 /**
  * GuildUpdateProcess constructor
@@ -24,100 +25,119 @@ GuildUpdateProcess.prototype.updateGuild = function () {
 
 
     async.waterfall([
-        function (callback) {
-            //Get next guild to update
-            updateService.getNextUpdate('wp_gu', function (error, guildUpdate) {
-                if (guildUpdate == null) {
-                    //Guild update is empty
-                    logger.info("No guild to update ... waiting 3 sec");
-                    setTimeout(function () {
-                        callback(true);
-                    }, 3000);
+            function (callback) {
+                //Get next guild to update
+                updateService.getNextUpdate('wp_gu', function (error, guildUpdate) {
+                    if (guildUpdate == null) {
+                        //Guild update is empty
+                        logger.info("No guild to update ... waiting 3 sec");
+                        setTimeout(function () {
+                            callback(true);
+                        }, 3000);
+                    } else {
+                        //CN PATCH
+                        if (guildUpdate.region == 'cn') {
+                            callback(true);
+                        } else {
+                            callback(error, guildUpdate);
+                        }
+                    }
+                });
+            },
+            function (guildUpdate, callback) {
+                if (guildUpdate.priority == 0) {
+                    updateModel.getCount("wp_cu", 0, function (error, count) {
+                        if (count > 10000) {
+                            logger.info("Too many characters in priority 0 ... waiting 1 min ");
+                            updateModel.insert("wp_gu", guildUpdate.region, guildUpdate.realm, guildUpdate.name, guildUpdate.priority, function () {
+                                setTimeout(function () {
+                                    callback(true);
+                                }, 60000);
+                            });
+                        } else {
+                            callback(error, guildUpdate);
+                        }
+                    });
+                } else if (guildUpdate.priority == 3) {
+                    updateModel.getCount("wp_cu", 3, function (error, count) {
+                        if (count > 10000) {
+                            logger.info("Too many characters in priority 3 ... waiting 1 min ");
+                            updateModel.insert("wp_gu", guildUpdate.region, guildUpdate.realm, guildUpdate.name, guildUpdate.priority, function () {
+                                setTimeout(function () {
+                                    callback(true);
+                                }, 60000);
+                            });
+                        } else {
+                            callback(error, guildUpdate);
+                        }
+                    });
                 } else {
-                    //CN PATCH
-                    if (guildUpdate.region == 'cn') {
-                        callback(true);
-                    } else {
-                        callback(error, guildUpdate);
-                    }
+                    callback(null, guildUpdate)
                 }
-            });
-        },
-        function (guildUpdate, callback) {
-            if (guildUpdate.priority == 0) {
-                updateModel.getCount("wp_cu", 0, function (error, count) {
-                    if (count > 10000) {
-                        logger.info("Too many characters in priority 0 ... waiting 1 min ");
-                        updateModel.insert("wp_gu", guildUpdate.region, guildUpdate.realm, guildUpdate.name, guildUpdate.priority, function () {
-                            setTimeout(function () {
-                                callback(true);
-                            }, 60000);
-                        });
+            },
+            function (guildUpdate, callback) {
+                //Sanitize name
+                logger.info("Update guild %s-%s-%s", guildUpdate.region, guildUpdate.realm, guildUpdate.name);
+                bnetAPI.getGuild(guildUpdate.region, guildUpdate.realm, guildUpdate.name, ["members"], function (error, guild) {
+                    if (error) {
+                        if (error.statusCode == 403) {
+                            logger.info("Bnet Api Deny ... waiting 1 min");
+                            updateModel.insert("wp_gu", guildUpdate.region, guildUpdate.realm, guildUpdate.name, guildUpdate.priority, function () {
+                                setTimeout(function () {
+                                    callback(true);
+                                }, 60000);
+                            });
+                        } else {
+                            callback(error);
+                        }
                     } else {
-                        callback(error, guildUpdate);
+                        if (guild && guild.realm && guild.name) {
+                            callback(error, guildUpdate.region, guild, guildUpdate.priority);
+                        } else {
+                            logger.warn("Bnet return empty guild skip it");
+                            callback(true);
+                        }
                     }
+
+                })
+            },
+            function (region, guild, priority, callback) {
+                guildService.setMembersToUpdate(region, guild.realm, guild.name, guild.members, priority, function (error) {
+                    callback(error, region, guild);
                 });
-            } else if (guildUpdate.priority == 3) {
-                updateModel.getCount("wp_cu", 3, function (error, count) {
-                    if (count > 10000) {
-                        logger.info("Too many characters in priority 3 ... waiting 1 min ");
-                        updateModel.insert("wp_gu", guildUpdate.region, guildUpdate.realm, guildUpdate.name, guildUpdate.priority, function () {
-                            setTimeout(function () {
-                                callback(true);
-                            }, 60000);
-                        });
-                    } else {
-                        callback(error, guildUpdate);
-                    }
-                });
-            } else {
-                callback(null, guildUpdate)
-            }
-        },
-        function (guildUpdate, callback) {
-            //Sanitize name
-            logger.info("Update guild %s-%s-%s", guildUpdate.region, guildUpdate.realm, guildUpdate.name);
-            bnetAPI.getGuild(guildUpdate.region, guildUpdate.realm, guildUpdate.name, ["members"], function (error, guild) {
-                if (error) {
-                    if (error.statusCode == 403) {
-                        logger.info("Bnet Api Deny ... waiting 1 min");
-                        updateModel.insert("wp_gu", guildUpdate.region, guildUpdate.realm, guildUpdate.name, guildUpdate.priority, function () {
-                            setTimeout(function () {
-                                callback(true);
-                            }, 60000);
-                        });
-                    } else {
+            },
+            function (region, guild, callback) {
+                async.waterfall(
+                    [
+                        function (callback) {
+                            guildModel.getGuildInfo(region, guild.realm, guild.name, function (error, guildInfos) {
+                                callback(error, guildInfos)
+                            });
+                        },
+                        function (guildsInfos, callback) {
+                            if (guildInfos == null || guildInfos.bnet == null) {
+                                //Refresh guild infos
+                                updateModel.insert("gu", region, guild.realm, guild.name, 0, function () {
+                                    callback(error)
+                                });
+                            }
+                        }
+                    ],
+                    function (error) {
                         callback(error);
                     }
-                } else {
-                    if (guild && guild.realm && guild.name) {
-                        callback(error, guildUpdate.region, guild, guildUpdate.priority);
-                    } else {
-                        logger.warn("Bnet return empty guild skip it");
-                        callback(true);
-                    }
-                }
-
-            })
-        },
-        function (region, guild, priority, callback) {
-            guildService.setMembersToUpdate(region, guild.realm, guild.name, guild.members, priority, function (error) {
-                callback(error, region, guild);
-            });
-        },
-        function (region, guild, callback) {
-            //Refresh guild infos
-            updateModel.insert("gu", guild.region, guild.realm, guild.name, 0, function () {
-                callback(error)
-            });
+                );
+            }
+        ],
+        function (error) {
+            if (error && error !== true) {
+                logger.error(error.message);
+            }
+            self.updateGuild();
         }
-    ], function (error) {
-        if (error && error !== true) {
-            logger.error(error.message);
-        }
-        self.updateGuild();
-    });
-};
+    );
+}
+;
 
 /**
  * Start GuildUpdateProcess
