@@ -87,11 +87,11 @@ module.exports.searchGuild = function (req, res) {
             function (guilds, callback) {
                 var guildsFinal = [];
                 async.each(guilds, function (guild, callback) {
-                    guildModel.getGuildInfo(guild.region, guild.realm, guild.name, function (error, guild) {
-                        if (guild && guild.bnet && guild.bnet.side != null) {
-                            guild["side"] = guild.bnet.side;
+                    guildModel.getGuildInfo(guild.region, guild.realm, guild.name, function (error, guildInfos) {
+                        if (guildInfos && guildInfos.bnet && guildInfos.bnet.side != null) {
+                            guild["side"] = guildInfos.bnet.side;
                         }
-                        if (guild && guild.ad && guild.ad.lfg == true) {
+                        if (guildInfos && guildInfos.ad && guildInfos.ad.lfg == true) {
                             guild["lfg"] = true;
                         }
                         guildsFinal.push(guild);
