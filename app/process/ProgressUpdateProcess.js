@@ -16,7 +16,68 @@ var bnetAPI = process.require("core/api/bnet.js");
  * @constructor
  */
 function ProgressUpdateProcess() {
+
 }
+
+/**
+ * Update Guild Progress
+ */
+ProgressUpdateProcess.prototype.updateGuildProgress2 = function () {
+
+    var logger = applicationStorage.logger;
+    var config = applicationStorage.config;
+    var self = this;
+
+    async.waterfall([
+            function (callback) {
+                //Get next guild to update
+                updateService.getNextUpdate('wp_pu', function (error, guildProgress) {
+                    if (guildProgress == null) {
+                        //Guild update is empty
+                        logger.info("No guild progress to update ... waiting 3 sec");
+                        setTimeout(function () {
+                            callback(true);
+                        }, 3000);
+                    } else {
+                        logger.info("Update guild process %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                        callback(error, guildProgress);
+                    }
+                });
+            },
+            function (guildProgress, callback) {
+                async.eachSeries(config.progress.raids, function (raid, callback) {
+
+                    var progress = {normalCount: 0, heroicCount: 0, mythicCount: 0};
+                    var bestNormalKillTimestamp = 0;
+                    var bestHeroicKillTimestamp = 0;
+                    var bestMythicKillTimestamp = 0;
+
+                    async.eachSeries(["normal", "heroic", "mythic"], function (difficulty, callback) {
+                        async.eachSeries(raid.bosses, function (boss, callback) {
+                            killModel.aggregateKills(raid.name, difficulty, boss, guildProgress.region, guildProgress.realm, guildProgress.name, function (error, result) {
+                                console.log(result);
+                                callback(error, result);
+                            });
+                        }, function (error) {
+                            callback(error);
+                        });
+                    }, function (error) {
+                        callback(error);
+                    });
+                }, function (error) {
+                    callback(error);
+                });
+            }
+        ],
+        function (error) {
+            if (error && error !== true) {
+                logger.error(error.message);
+            }
+            self.updateGuildProgress2();
+        }
+    )
+
+};
 
 /**
  * Update Guild progress
@@ -207,7 +268,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
  */
 ProgressUpdateProcess.prototype.start = function (callback) {
     applicationStorage.logger.info("Starting ProgressUpdateProcess");
-    this.updateGuildProgress();
+    this.updateGuildProgress2();
     callback();
 
 };
