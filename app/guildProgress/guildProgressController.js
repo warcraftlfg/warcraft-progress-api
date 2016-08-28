@@ -85,6 +85,7 @@ module.exports.searchGuild = function (req, res) {
                 );
             },
             function (guilds, callback) {
+                var guildsFinal = [];
                 async.each(guilds, function (guild, callback) {
                     guildModel.getGuildInfo(guild.region, guild.realm, guild.name, function (error, guild) {
                         if (guild && guild.bnet && guild.bnet.side != null) {
@@ -93,11 +94,11 @@ module.exports.searchGuild = function (req, res) {
                         if (guild && guild.ad && guild.ad.lfg == true) {
                             guild["lfg"] = true;
                         }
+                        guildsFinal.push(guild);
                         callback(error);
                     });
-
                 }, function (error) {
-                    callback(error, guilds);
+                    callback(error, guildsFinal);
                 })
             }
         ], function (error, guilds) {
