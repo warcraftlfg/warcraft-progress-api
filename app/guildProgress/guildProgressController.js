@@ -76,7 +76,7 @@ module.exports.searchGuild = function (req, res) {
         }
         async.waterfall([
             function (callback) {
-                guildProgressModel.find({name: {$regex: "^" + req.params.text, $options: "i"},"progress.tier_18":{$exists:true}},
+                guildProgressModel.find({name: {$regex: "^" + req.params.text, $options: "i"},"progress.tier_18.normalCount":{$gt:0}},
                     {region: 1, realm: 1, name: 1, _id: 0},
                     {name: 1}, limit,
                     function (error, guilds) {
