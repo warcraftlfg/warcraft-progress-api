@@ -121,6 +121,8 @@ GuildUpdateProcess.prototype.updateGuild = function () {
                                 updateModel.insert("gu", region, guild.realm, guild.name, 0, function (error) {
                                     callback(error)
                                 });
+                            } else {
+                                callback();
                             }
                         }
                     ],
