@@ -7,5 +7,6 @@ var guildProgressController = process.require("guildProgress/guildProgressContro
 //Define routes
 router.get('/progress/:tier/:region/:realm/:name', guildProgressController.getProgress);
 router.get('/progress/simple/:tier/:region/:realm/:name', guildProgressController.getProgressSimple);
+router.get("/search/:text", guildProgressController.searchGuild);
 
 module.exports = router;
