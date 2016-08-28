@@ -102,7 +102,13 @@ GuildUpdateProcess.prototype.updateGuild = function () {
         },
         function (region, guild, priority, callback) {
             guildService.setMembersToUpdate(region, guild.realm, guild.name, guild.members, priority, function (error) {
-                callback(error);
+                callback(error, region, guild);
+            });
+        },
+        function (region, guild, callback) {
+            //Refresh guild infos
+            updateModel.insert("gu", guild.region, guild.realm, guild.name, 0, function () {
+                callback(error)
             });
         }
     ], function (error) {
