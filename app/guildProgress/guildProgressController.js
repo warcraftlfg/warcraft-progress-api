@@ -4,6 +4,8 @@
 var applicationStorage = process.require("core/applicationStorage.js");
 var guildProgressModel = process.require("guildProgress/guildProgressModel.js");
 var guildModel = process.require("guilds/guildModel.js");
+var async = require("async");
+
 
 
 module.exports.getProgress = function (req, res, next) {
