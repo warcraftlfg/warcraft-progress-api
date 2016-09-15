@@ -45,18 +45,72 @@ ProgressUpdateProcess.prototype.updateGuildProgress2 = function () {
                 });
             },
             function (guildProgress, callback) {
+                var progress = {};
+                var bestKillTimestamps = {normal: 0, heroic: 0, mythic: 0};
+
                 async.eachSeries(config.progress.raids, function (raid, callback) {
 
-                    var progress = {normalCount: 0, heroicCount: 0, mythicCount: 0};
-                    var bestNormalKillTimestamp = 0;
-                    var bestHeroicKillTimestamp = 0;
-                    var bestMythicKillTimestamp = 0;
+                    progress[raid.tier] = {};
+                    progress[raid.tier][raid.name] = {normalCount: 0, heroicCount: 0, mythicCount: 0};
+
+
 
                     async.eachSeries(["normal", "heroic", "mythic"], function (difficulty, callback) {
+                        progress[raid.tier][raid.name][difficulty] = {};
                         async.eachSeries(raid.bosses, function (boss, callback) {
-                            killModel.aggregateKills(raid.name, difficulty, boss, guildProgress.region, guildProgress.realm, guildProgress.name, function (error, result) {
-                                console.log(result);
-                                callback(error, result);
+                            progress[raid.tier][raid.name][difficulty][boss] = {timestamps: [], irrelevantTimestamps: []};
+                            killModel.aggregateKills(raid.name, difficulty, boss, guildProgress.region, guildProgress.realm, guildProgress.name, function (error, kills) {
+                                for (var i = 0; i < kills.length; i++) {
+
+                                    var currentKill = {timestamp: kills[i]._id.timestamp, count: kills[i].count};
+                                    if (i + 1 < kills.length) {
+                                        var nextKill = {timestamp: kills[i + 1]._id.timestamp, count: kills[i + 1].count};
+                                        if (currentKill.timestamp + 1000 == nextKill.timestamp) {
+                                            if (difficulty == "mythic") {
+                                                if (currentKill.count + nextKill.count >= 16) {
+                                                    progress[raid.tier][raid.name][difficulty][boss]["timestamps"].push([currentKill.timestamp, nextKill.timestamp]);
+                                                } else {
+                                                    progress[raid.tier][raid.name][difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp, nextKill.timestamp]);
+                                                }
+                                            } else {
+                                                if (currentKill.count + nextKill.count >= 8) {
+                                                    progress[raid.tier][raid.name][difficulty][boss]["timestamps"].push([currentKill.timestamp, nextKill.timestamp]);
+                                                } else {
+                                                    progress[raid.tier][raid.name][difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp, nextKill.timestamp]);
+                                                }
+                                            }
+                                            //Skip the next
+                                            i++;
+                                            continue;
+                                        }
+                                    }
+
+                                    //One timestamp kill
+                                    if (difficulty == "mythic") {
+                                        if (currentKill.count >= 16) {
+                                            progress[raid.tier][raid.name][difficulty][boss]["timestamps"].push([currentKill.timestamp]);
+                                        } else {
+                                            progress[raid.tier][raid.name][difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp]);
+                                        }
+                                    } else {
+                                        if (currentKill.count >= 8) {
+                                            progress[raid.tier][raid.name][difficulty][boss]["timestamps"].push([currentKill.timestamp]);
+                                        } else {
+                                            progress[raid.tier][raid.name][difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp]);
+                                        }
+                                    }
+                                }
+
+                                if (progress[raid.tier][raid.name][difficulty][boss]["timestamps"].length > 0) {
+                                    if (progress[raid.tier][raid.name][difficulty][boss]["timestamps"][0][0] > bestKillTimestamps[difficulty]) {
+                                        bestKillTimestamps[difficulty] = progress[raid.tier][raid.name][difficulty][boss]["timestamps"][0][0];
+                                    }
+                                    progress[raid.tier][raid.name][difficulty+"Count"]++;
+
+                                }
+
+
+                                callback(error);
                             });
                         }, function (error) {
                             callback(error);
@@ -66,7 +120,14 @@ ProgressUpdateProcess.prototype.updateGuildProgress2 = function () {
                     });
                 }, function (error) {
                     callback(error);
+
+                    //TODO Put progress in guild
+                    //TODO Put ranking in ranking
+                    console.log(progress['18']['Hellfire Citadel']);
+                    console.log(bestKillTimestamps);
+
                 });
+
             }
         ],
         function (error) {
@@ -77,7 +138,8 @@ ProgressUpdateProcess.prototype.updateGuildProgress2 = function () {
         }
     )
 
-};
+}
+;
 
 /**
  * Update Guild progress
