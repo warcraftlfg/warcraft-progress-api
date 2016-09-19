@@ -16,15 +16,18 @@ var bnetAPI = process.require("core/api/bnet.js");
  * @constructor
  */
 function ProgressUpdateProcess() {
+
 }
 
 /**
- * Update Guild progress
+ * Update Guild Progress
  */
 ProgressUpdateProcess.prototype.updateGuildProgress = function () {
+
     var logger = applicationStorage.logger;
     var config = applicationStorage.config;
     var self = this;
+
     async.waterfall([
             function (callback) {
                 //Get next guild to update
@@ -42,150 +45,167 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                 });
             },
             function (guildProgress, callback) {
+                var bestKillTimestamps = {all: 0, normal: 0, heroic: 0, mythic: 0};
+
                 async.eachSeries(config.progress.raids, function (raid, callback) {
-                    async.waterfall([
+
+                    var progress = {normalCount: 0, heroicCount: 0, mythicCount: 0};
+
+
+                    async.eachSeries(["normal", "heroic", "mythic"], function (difficulty, callback) {
+                        progress[difficulty] = {};
+                        async.eachSeries(raid.bosses, function (boss, callback) {
+                            progress[difficulty][boss] = {timestamps: [], irrelevantTimestamps: []};
+                            killModel.aggregateKills(raid.name, difficulty, boss, guildProgress.region, guildProgress.realm, guildProgress.name, function (error, kills) {
+                                for (var i = 0; i < kills.length; i++) {
+
+                                    var currentKill = {timestamp: kills[i]._id.timestamp, count: kills[i].count};
+                                    if (i + 1 < kills.length) {
+                                        var nextKill = {timestamp: kills[i + 1]._id.timestamp, count: kills[i + 1].count};
+                                        if (currentKill.timestamp + 1000 == nextKill.timestamp) {
+                                            if (difficulty == "mythic") {
+                                                if (currentKill.count + nextKill.count >= 16) {
+                                                    progress[difficulty][boss]["timestamps"].push([currentKill.timestamp, nextKill.timestamp]);
+                                                } else {
+                                                    progress[difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp, nextKill.timestamp]);
+                                                }
+                                            } else {
+                                                if (currentKill.count + nextKill.count >= 8) {
+                                                    progress[difficulty][boss]["timestamps"].push([currentKill.timestamp, nextKill.timestamp]);
+                                                } else {
+                                                    progress[difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp, nextKill.timestamp]);
+                                                }
+                                            }
+                                            //Skip the next
+                                            i++;
+                                            continue;
+                                        }
+                                    }
+
+                                    //One timestamp kill
+                                    if (difficulty == "mythic") {
+                                        if (currentKill.count >= 16) {
+                                            progress[difficulty][boss]["timestamps"].push([currentKill.timestamp]);
+                                        } else {
+                                            progress[difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp]);
+                                        }
+                                    } else {
+                                        if (currentKill.count >= 8) {
+                                            progress[difficulty][boss]["timestamps"].push([currentKill.timestamp]);
+                                        } else {
+                                            progress[difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp]);
+                                        }
+                                    }
+                                }
+
+                                if (progress[difficulty][boss]["timestamps"].length > 0) {
+                                    if (progress[difficulty][boss]["timestamps"][0][0] > bestKillTimestamps[difficulty]) {
+                                        bestKillTimestamps[difficulty] = progress[difficulty][boss]["timestamps"][0][0];
+                                    }
+                                    progress[difficulty + "Count"]++;
+
+                                }
+
+
+                                callback(error);
+                            });
+                        }, function (error) {
+                            callback(error);
+                        });
+                    }, function (error) {
+                        if (error) {
+                            return callback(error);
+                        }
+
+                        if (bestKillTimestamps['mythic'] != 0) {
+                            bestKillTimestamps['all'] = bestKillTimestamps['mythic'];
+                        } else if (bestKillTimestamps['heroic'] != 0) {
+                            bestKillTimestamps['all'] = bestKillTimestamps['heroic'];
+                        } else if (bestKillTimestamps['normal'] != 0) {
+                            bestKillTimestamps['all'] = bestKillTimestamps['normal'];
+                        }
+
+                        var preScore = 0;
+                        if (progress.normalCount && progress.normalCount > 0) {
+                            preScore = progress.normalCount;
+                        }
+                        if (progress.heroicCount && progress.heroicCount > 0) {
+                            preScore = progress.heroicCount * 100;
+                        }
+                        if (progress.mythicCount && progress.mythicCount > 0) {
+                            preScore = progress.mythicCount * 10000;
+                        }
+
+                        //Calculate the score for redis bestTimestamp - 2Years * score
+                        var score = parseInt(bestKillTimestamps['all'] / 1000, 10) - (3600 * 24 * 365 * 2 * preScore);
+
+                        async.parallel([
                             function (callback) {
-                                killModel.computeProgress(guildProgress.region, guildProgress.realm, guildProgress.name, raid.tier, function (error, result) {
-                                    callback(error, result);
+                                guildProgressModel.upsertProgress(guildProgress.region, guildProgress.realm, guildProgress.name, raid.tier, raid.name, progress, function (error) {
+                                        logger.verbose("Update Progress for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                        callback(error);
+                                    }
+                                );
+                            },
+                            function (callback) {
+                                rankModel.upsert("tier_" + raid.tier + "#" + raid.name, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                    logger.verbose("Update World Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                    callback(error);
                                 });
                             },
-                            function (result, callback) {
-                                var progress = {normalCount: 0, heroicCount: 0, mythicCount: 0};
-                                var bestNormalKillTimestamp = 0;
-                                var bestHeroicKillTimestamp = 0;
-                                var bestMythicKillTimestamp = 0;
-
-                                async.forEachSeries(result, function (obj, callback) {
-
-
-                                    logger.verbose("Kills found for %s-%s R:(%s) I:(%s)", obj._id.boss, obj._id.difficulty, obj.value.timestamps.join(','), obj.value.irrelevantTimestamps.join(','))
-
-                                    if (!progress[obj._id.difficulty]) {
-                                        progress[obj._id.difficulty] = {};
-                                    }
-                                    progress[obj._id.difficulty][obj._id.boss] = obj.value;
-
-                                    if (!progress[obj._id.difficulty + "Count"]) {
-                                        progress[obj._id.difficulty + "Count"] = 0;
-                                    }
-
-                                    if (obj.value.timestamps.length > 0) {
-                                        progress[obj._id.difficulty + "Count"]++;
-                                        if (obj._id.difficulty == "normal") {
-                                            if (obj.value.timestamps[0][0] > bestNormalKillTimestamp) {
-                                                bestNormalKillTimestamp = obj.value.timestamps[0][0];
-                                            }
-                                        } else if (obj._id.difficulty == "heroic") {
-                                            if (obj.value.timestamps[0][0] > bestHeroicKillTimestamp) {
-                                                bestHeroicKillTimestamp = obj.value.timestamps[0][0];
-                                            }
-                                        } else {
-                                            if (obj.value.timestamps[0][0] > bestMythicKillTimestamp) {
-                                                bestMythicKillTimestamp = obj.value.timestamps[0][0];
-                                            }
-                                        }
-                                    }
-
-
-                                    callback();
-                                }, function () {
-                                    var obj = {};
-                                    if (bestMythicKillTimestamp != 0) {
-                                        progress.bestKillTimestamp = bestMythicKillTimestamp;
-                                    } else if (bestHeroicKillTimestamp != 0) {
-                                        progress.bestKillTimestamp = bestHeroicKillTimestamp;
-                                    } else if (bestNormalKillTimestamp != 0) {
-                                        progress.bestKillTimestamp = bestNormalKillTimestamp;
-                                    }
-
-                                    progress.updated = new Date().getTime();
-                                    obj["tier_" + raid.tier] = progress;
-
-                                    guildProgressModel.upsert(guildProgress.region, guildProgress.realm, guildProgress.name, {progress: obj}, function (error) {
-                                        logger.verbose("Update Progress for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
-                                        callback(error, progress);
-                                    });
-
+                            function (callback) {
+                                rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + guildProgress.region, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                    logger.verbose("Update Region Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                    callback(error);
                                 });
-                            }, function (progress, callback) {
-                                if (progress.bestKillTimestamp) {
-                                    logger.verbose("Update Score for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
-
-                                    var preScore = 0;
-                                    if (progress.normalCount && progress.normalCount > 0) {
-                                        preScore = progress.normalCount;
-                                    }
-                                    if (progress.heroicCount && progress.heroicCount > 0) {
-                                        preScore = progress.heroicCount * 100;
-                                    }
-                                    if (progress.mythicCount && progress.mythicCount > 0) {
-                                        preScore = progress.mythicCount * 10000;
-                                    }
-                                    //Calculate the score for redis bestTimestamp - 2Years * score
-                                    var score = parseInt(progress.bestKillTimestamp / 1000, 10) - (3600 * 24 * 365 * 2 * preScore);
-
-                                    async.parallel([
-                                        function (callback) {
-                                            rankModel.upsert(raid.tier, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
-                                                callback(error);
-                                            });
-                                        },
-                                        function (callback) {
-                                            rankModel.upsert(raid.tier + "_" + guildProgress.region, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
-                                                callback(error);
-                                            });
-                                        },
-                                        function (callback) {
-                                            realmModel.findOne({
-                                                region: guildProgress.region,
-                                                name: guildProgress.realm
-                                            }, {
-                                                connected_realms: 1,
-                                                "bnet.locale": 1,
-                                                "bnet.timezone": 1
-                                            }, function (error, realm) {
-                                                if (realm && realm.connected_realms && realm.bnet && realm.bnet.locale && realm.bnet.timezone) {
-                                                    async.parallel([
-                                                        function (callback) {
-                                                            rankModel.upsert(raid.tier + "_" + guildProgress.region + "_" + realm.connected_realms.join('_'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
-                                                                callback(error);
-                                                            });
-                                                        },
-                                                        function (callback) {
-                                                            var zoneArray = realm.bnet.timezone.split('/');
-                                                            if (zoneArray.length > 0) {
-                                                                rankModel.upsert(raid.tier + "_" + realm.bnet.locale + "_" + zoneArray[0], guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
-                                                                    callback(error);
-                                                                });
-                                                            } else {
-                                                                callback(error)
-                                                            }
-                                                        }
-                                                    ], function (error) {
-                                                        callback(error)
+                            },
+                            function (callback) {
+                                realmModel.findOne({
+                                    region: guildProgress.region,
+                                    name: guildProgress.realm
+                                }, {
+                                    connected_realms: 1,
+                                    "bnet.locale": 1,
+                                    "bnet.timezone": 1
+                                }, function (error, realm) {
+                                    if (realm && realm.connected_realms && realm.bnet && realm.bnet.locale && realm.bnet.timezone) {
+                                        async.parallel([
+                                            function (callback) {
+                                                rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + guildProgress.region + realm.connected_realms.join('#'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                    logger.verbose("Update Realm Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                                    callback(error);
+                                                });
+                                            },
+                                            function (callback) {
+                                                var zoneArray = realm.bnet.timezone.split('/');
+                                                if (zoneArray.length > 0) {
+                                                    rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#"  + realm.bnet.locale + "#" + zoneArray[0], guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                        logger.verbose("Update Locale Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                                        callback(error);
                                                     });
                                                 } else {
-                                                    logger.warn("Realm %s-%s not found", guildProgress.region, guildProgress.realm);
-                                                    callback(error);
+                                                    callback(error)
                                                 }
-                                            });
-                                        }
-                                    ], function (error) {
+                                            }
+                                        ], function (error) {
+                                            callback(error)
+                                        });
+                                    } else {
+                                        logger.warn("Realm %s-%s not found", guildProgress.region, guildProgress.realm);
                                         callback(error);
-                                    });
-
-                                } else {
-                                    callback();
-                                }
+                                    }
+                                });
                             }
-                        ],
-                        function (error) {
+                        ], function (error) {
                             callback(error);
-                        }
-                    )
+                        });
+
+
+                    });
                 }, function (error) {
                     callback(error);
                 });
+
             }
         ],
         function (error) {
@@ -193,13 +213,10 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                 logger.error(error.message);
             }
             self.updateGuildProgress();
-
-
         }
     )
-    ;
-}
-;
+
+};
 
 /**
  * Start ProgressUpdateProcess

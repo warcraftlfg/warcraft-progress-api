@@ -13,11 +13,11 @@ var applicationStorage = process.require("core/applicationStorage");
  * @param score
  * @param callback
  */
-module.exports.upsert = function (tier, region, realm, name, score, callback) {
+module.exports.upsert = function (key, region, realm, name, score, callback) {
     var redis = applicationStorage.redis;
 
     //Create or update auctionUpdate
-    redis.zadd("tier_" + tier, score, region + "-" + realm + "-" + name, function (error) {
+    redis.zadd(key, score, region + "#" + realm + "#" + name, function (error) {
         callback(error);
     });
 
@@ -32,11 +32,11 @@ module.exports.upsert = function (tier, region, realm, name, score, callback) {
  * @param name
  * @param callback
  */
-module.exports.getRank = function (tier, region, realm, name, callback) {
+module.exports.getRank = function (key, region, realm, name, callback) {
     var redis = applicationStorage.redis;
 
     //Create or update auctionUpdate
-    redis.zrank("tier_" + tier, region + "-" + realm + "-" + name, function (error, rank) {
+    redis.zrank(key, region + "#" + realm + "#" + name, function (error, rank) {
         callback(error, rank);
     });
 
@@ -52,7 +52,7 @@ module.exports.getRanking = function (key, start, end, callback) {
     var redis = applicationStorage.redis;
 
     //Create or update auctionUpdate
-    redis.zrange("tier_" + key, start, end, function (error, ranking) {
+    redis.zrange(key, start, end, function (error, ranking) {
         callback(error, ranking);
     });
 
