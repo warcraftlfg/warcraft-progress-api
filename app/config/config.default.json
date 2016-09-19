@@ -1,6 +1,6 @@
 {
   "bnet": {
-    "clientID": "your clientID"
+    "clientID": ""
   },
   "database": {
     "mongo": "mongodb://localhost/warcraft-lfg",
@@ -25,50 +25,23 @@
   ],
   "levelMax": 100,
   "progress": {
+    "difficulties": [
+      "normal",
+      "heroic",
+      "mythic"
+    ],
     "raids": [
       {
-        "name": "Hellfire Citadel",
-        "tier": 18,
+        "name": "The Emerald Nightmare",
+        "tier": 19,
         "bosses": [
-          {
-            "name": "Hellfire Assault"
-          },
-          {
-            "name": "Iron Reaver"
-          },
-          {
-            "name": "Kormrok"
-          },
-          {
-            "name": "Hellfire High Council"
-          },
-          {
-            "name": "Kilrogg Deadeye"
-          },
-          {
-            "name": "Gorefiend"
-          },
-          {
-            "name": "Shadow-Lord Iskar"
-          },
-          {
-            "name": "Socrethar the Eternal"
-          },
-          {
-            "name": "Tyrant Velhari"
-          },
-          {
-            "name": "Fel Lord Zakuun"
-          },
-          {
-            "name": "Xhul'horac"
-          },
-          {
-            "name": "Mannoroth"
-          },
-          {
-            "name": "Archimonde"
-          }
+          "Nythendra",
+          "Elerethe Renferal",
+          "Il'gynoth, Heart of Corruption",
+          "Ursoc",
+          "Dragons of Nightmare",
+          "Cenarius",
+          "Xavius"
         ]
       }
     ]
