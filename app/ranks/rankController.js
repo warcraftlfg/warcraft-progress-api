@@ -15,7 +15,7 @@ module.exports.getRank = function (req, res, next) {
 
     async.parallel({
         world: function (callback) {
-            rankModel.getRank(req.params.tier, req.params.region, req.params.realm, req.params.name, function (error, rank) {
+            rankModel.getRank("tier_" + req.params.tier + "#" + req.params.raid, req.params.region, req.params.realm, req.params.name, function (error, rank) {
                 if (rank != null) {
                     callback(error, rank + 1)
                 } else {
@@ -24,7 +24,7 @@ module.exports.getRank = function (req, res, next) {
             });
         },
         region: function (callback) {
-            rankModel.getRank(req.params.tier + "_" + req.params.region, req.params.region, req.params.realm, req.params.name, function (error, rank) {
+            rankModel.getRank("tier_" + req.params.tier + "#" + req.params.raid + "#" + req.params.region, req.params.region, req.params.realm, req.params.name, function (error, rank) {
                 if (rank != null) {
                     callback(error, rank + 1)
                 } else {
@@ -40,7 +40,7 @@ module.exports.getRank = function (req, res, next) {
                 if (realm && realm.connected_realms && realm.bnet && realm.bnet.locale && realm.bnet.timezone) {
                     async.parallel({
                         realm: function (callback) {
-                            rankModel.getRank(req.params.tier + "_" + req.params.region + "_" + realm.connected_realms.join('_'), req.params.region, req.params.realm, req.params.name, function (error, rank) {
+                            rankModel.getRank("tier_" + req.params.tier + "#" + req.params.raid + "#" + req.params.region + "#" + realm.connected_realms.join('#'), req.params.region, req.params.realm, req.params.name, function (error, rank) {
                                 if (rank != null) {
                                     callback(error, rank + 1)
                                 } else {
@@ -50,19 +50,19 @@ module.exports.getRank = function (req, res, next) {
                         },
                         locale: function (callback) {
                             var zoneArray = realm.bnet.timezone.split('/');
-                            if(zoneArray.length > 0 ) {
-                                rankModel.getRank(req.params.tier + "_" + realm.bnet.locale+"_"+zoneArray[0], req.params.region, req.params.realm, req.params.name, function (error, rank) {
+                            if (zoneArray.length > 0) {
+                                rankModel.getRank("tier_" + req.params.tier + "#" + req.params.raid + "#" + realm.bnet.locale + "#" + zoneArray[0], req.params.region, req.params.realm, req.params.name, function (error, rank) {
                                     if (rank != null) {
                                         var result = {};
                                         result['rank'] = rank + 1;
-                                        result['type'] = realm.bnet.locale+"_"+zoneArray[0];
+                                        result['type'] = realm.bnet.locale + "_" + zoneArray[0];
                                         callback(error, result)
                                     } else {
                                         callback(error, null)
                                     }
                                 });
-                            }else {
-                                callback(error,null);
+                            } else {
+                                callback(error, null);
                             }
                         }
                     }, function (error, result) {
@@ -133,17 +133,17 @@ module.exports.getRanking = function (req, res, next) {
                     name: req.params.realm
                 }, {connected_realms: 1}, function (error, realm) {
                     if (realm) {
-                        key = req.params.tier + "_" + req.params.region + "_" + realm.connected_realms.join('_');
+                        key = "tier_" + req.params.tier + "#" + req.params.tier + "#" + req.params.region + "#" + realm.connected_realms.join('#');
                         callback(error, key);
                     } else {
                         callback(new Error("Realm %s-%s not found", req.params.region, req.params.realm));
                     }
                 });
             } else if (req.params.region) {
-                key = req.params.tier + "_" + req.params.region;
+                key = "tier_" + req.params.tier + "#" + req.params.tier + "#" + req.params.region;
                 callback(null, key);
             } else if (req.params.locale) {
-                key = req.params.tier + "_" + req.params.locale;
+                key = "tier_" + req.params.tier + "#" + req.params.tier + "#" + req.params.locale;
                 callback(null, key);
             } else {
                 callback(null, key);
@@ -162,13 +162,7 @@ module.exports.getRanking = function (req, res, next) {
             var finalRanking = {};
             var counter = 1;
             async.forEachSeries(ranking, function (rank, callback) {
-                var rankArray = rank.split('-');
-
-                //Fix realm with - ...
-                if (rankArray.length == 4) {
-                    rankArray[1] = rankArray[1] + "-" + rankArray[2];
-                    rankArray[2] = rankArray[3];
-                }
+                var rankArray = rank.split('#');
 
                 finalRanking[start + counter] = {region: rankArray[0], realm: rankArray[1], name: rankArray[2]};
                 async.parallel([
@@ -192,14 +186,14 @@ module.exports.getRanking = function (req, res, next) {
                                 var difficulties = ["normal", "heroic", "mythic"];
                                 difficulties.forEach(function (difficulty) {
                                     raid.bosses.forEach(function (boss) {
-                                        project["progress.tier_" + req.params.tier + "." + difficulty + "." + boss] = {$size: {$ifNull: ["$progress.tier_" + req.params.tier + "." + difficulty + "." + boss + ".timestamps", []]}};
+                                        project["progress.tier_" + req.params.tier + "." + req.params.raid + "." + difficulty + "." + boss] = {$size: {$ifNull: ["$progress.tier_" + req.params.tier + "." + difficulty + "." + boss + ".timestamps", []]}};
                                     });
                                 });
                             }
                         });
-                        project["progress.tier_" + req.params.tier + ".normalCount"] = 1;
-                        project["progress.tier_" + req.params.tier + ".heroicCount"] = 1;
-                        project["progress.tier_" + req.params.tier + ".mythicCount"] = 1;
+                        project["progress.tier_" + req.params.tier + "." + req.params.raid + ".normalCount"] = 1;
+                        project["progress.tier_" + req.params.tier + "." + req.params.raid + ".heroicCount"] = 1;
+                        project["progress.tier_" + req.params.tier + "." + req.params.raid + ".mythicCount"] = 1;
 
 
                         guildProgressModel.aggregate({
@@ -208,8 +202,8 @@ module.exports.getRanking = function (req, res, next) {
                             name: rankArray[2]
                         }, project, function (error, result) {
 
-                            if (result && result.length > 0 && result[0]['progress'] && result[0]['progress']["tier_" + req.params.tier]) {
-                                finalRanking[start + counter]["progress"] = result[0]["progress"]["tier_" + req.params.tier];
+                            if (result && result.length > 0 && result[0]['progress'] && result[0]['progress']["tier_" + req.params.tier] && result[0]['progress']["tier_" + req.params.tier][req.params.raid]) {
+                                finalRanking[start + counter]["progress"] = result[0]["progress"]["tier_" + req.params.tier][req.params.raid];
                             }
                             callback(error);
                         });
@@ -217,8 +211,8 @@ module.exports.getRanking = function (req, res, next) {
 
                     },
                     function (callback) {
-                        rankModel.getRank(req.params.tier, rankArray[0], rankArray[1], rankArray[2], function (error, rank) {
-                            if (rank!=null) {
+                        rankModel.getRank("tier_" + req.params.tier + "#" + req.params.raid, rankArray[0], rankArray[1], rankArray[2], function (error, rank) {
+                            if (rank != null) {
                                 finalRanking[start + counter]["world"] = rank + 1;
                             }
                             callback(error);

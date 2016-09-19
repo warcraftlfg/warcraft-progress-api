@@ -51,18 +51,9 @@ module.exports.find = function (criteria, projection, sort, limit, hint, callbac
  * @param obj
  * @param callback
  */
-module.exports.upsert = function (region, realm, name, obj, callback) {
+module.exports.upsertProgress = function (region, realm, name, tier, raid, progress, callback) {
 
     var guild = {};
-
-
-    if (obj.progress) {
-        guild.progress = obj.progress;
-    }
-
-    if (obj.rank) {
-        guild.rank = obj.rank;
-    }
 
     //Format value
     region = region.toLowerCase();
@@ -71,6 +62,7 @@ module.exports.upsert = function (region, realm, name, obj, callback) {
     guild.realm = realm;
     guild.name = name;
     guild.updated = new Date().getTime();
+    guild['progress.tier_' + tier + '.' + raid] = progress;
 
     //Upsert
     var collection = applicationStorage.mongo.collection("guilds_progress");
