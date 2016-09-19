@@ -15,7 +15,7 @@ module.exports.getRank = function (req, res, next) {
 
     async.parallel({
         world: function (callback) {
-            rankModel.getRank("tier_" + req.params.tier + "#" + req.params.raid, req.params.region, req.params.realm, req.params.name, function (error, rank) {
+            rankModel.getRank("tier_" + req.params.tier, req.params.region, req.params.realm, req.params.name, function (error, rank) {
                 if (rank != null) {
                     callback(error, rank + 1)
                 } else {
@@ -24,7 +24,7 @@ module.exports.getRank = function (req, res, next) {
             });
         },
         region: function (callback) {
-            rankModel.getRank("tier_" + req.params.tier + "#" + req.params.raid + "#" + req.params.region, req.params.region, req.params.realm, req.params.name, function (error, rank) {
+            rankModel.getRank("tier_" + req.params.tier + "#" + req.params.region, req.params.region, req.params.realm, req.params.name, function (error, rank) {
                 if (rank != null) {
                     callback(error, rank + 1)
                 } else {
@@ -40,7 +40,7 @@ module.exports.getRank = function (req, res, next) {
                 if (realm && realm.connected_realms && realm.bnet && realm.bnet.locale && realm.bnet.timezone) {
                     async.parallel({
                         realm: function (callback) {
-                            rankModel.getRank("tier_" + req.params.tier + "#" + req.params.raid + "#" + req.params.region + "#" + realm.connected_realms.join('#'), req.params.region, req.params.realm, req.params.name, function (error, rank) {
+                            rankModel.getRank("tier_" + req.params.tier  + "#" + req.params.region + "#" + realm.connected_realms.join('#'), req.params.region, req.params.realm, req.params.name, function (error, rank) {
                                 if (rank != null) {
                                     callback(error, rank + 1)
                                 } else {
@@ -51,7 +51,7 @@ module.exports.getRank = function (req, res, next) {
                         locale: function (callback) {
                             var zoneArray = realm.bnet.timezone.split('/');
                             if (zoneArray.length > 0) {
-                                rankModel.getRank("tier_" + req.params.tier + "#" + req.params.raid + "#" + realm.bnet.locale + "#" + zoneArray[0], req.params.region, req.params.realm, req.params.name, function (error, rank) {
+                                rankModel.getRank("tier_" + req.params.tier + "#" + realm.bnet.locale + "#" + zoneArray[0], req.params.region, req.params.realm, req.params.name, function (error, rank) {
                                     if (rank != null) {
                                         var result = {};
                                         result['rank'] = rank + 1;
@@ -211,7 +211,7 @@ module.exports.getRanking = function (req, res, next) {
 
                     },
                     function (callback) {
-                        rankModel.getRank("tier_" + req.params.tier + "#" + req.params.raid, rankArray[0], rankArray[1], rankArray[2], function (error, rank) {
+                        rankModel.getRank("tier_" + req.params.tier , rankArray[0], rankArray[1], rankArray[2], function (error, rank) {
                             if (rank != null) {
                                 finalRanking[start + counter]["world"] = rank + 1;
                             }

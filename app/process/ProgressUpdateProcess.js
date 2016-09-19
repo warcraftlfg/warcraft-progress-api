@@ -148,14 +148,26 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                 );
                             },
                             function (callback) {
+                                rankModel.upsert("tier_" + raid.tier, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                    logger.verbose("Update Region Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                    callback(error);
+                                });
+                            },
+                            function (callback) {
+                                rankModel.upsert("tier_" + raid.tier + "#" + guildProgress.region, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                    logger.verbose("Update Region Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                    callback(error);
+                                });
+                            },
+                            function (callback) {
                                 rankModel.upsert("tier_" + raid.tier + "#" + raid.name, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
-                                    logger.verbose("Update World Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                    logger.verbose("Update World Rank with Raid for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
                                     callback(error);
                                 });
                             },
                             function (callback) {
                                 rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + guildProgress.region, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
-                                    logger.verbose("Update Region Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                    logger.verbose("Update Region Rank with Raid for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
                                     callback(error);
                                 });
                             },
@@ -171,16 +183,33 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                     if (realm && realm.connected_realms && realm.bnet && realm.bnet.locale && realm.bnet.timezone) {
                                         async.parallel([
                                             function (callback) {
-                                                rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + guildProgress.region + realm.connected_realms.join('#'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                rankModel.upsert("tier_" + raid.tier + "#" + guildProgress.region + realm.connected_realms.join('#'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
                                                     logger.verbose("Update Realm Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                                    callback(error);
+                                                });
+                                            },
+                                            function (callback) {
+                                                rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + guildProgress.region + realm.connected_realms.join('#'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                    logger.verbose("Update Realm Rank with Raid for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
                                                     callback(error);
                                                 });
                                             },
                                             function (callback) {
                                                 var zoneArray = realm.bnet.timezone.split('/');
                                                 if (zoneArray.length > 0) {
-                                                    rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#"  + realm.bnet.locale + "#" + zoneArray[0], guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                    rankModel.upsert("tier_" + raid.tier + "#" + realm.bnet.locale + "#" + zoneArray[0], guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
                                                         logger.verbose("Update Locale Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                                        callback(error);
+                                                    });
+                                                } else {
+                                                    callback(error)
+                                                }
+                                            },
+                                            function (callback) {
+                                                var zoneArray = realm.bnet.timezone.split('/');
+                                                if (zoneArray.length > 0) {
+                                                    rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + realm.bnet.locale + "#" + zoneArray[0], guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                        logger.verbose("Update Locale Rank with Raid for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
                                                         callback(error);
                                                     });
                                                 } else {
