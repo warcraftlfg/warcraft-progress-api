@@ -233,7 +233,8 @@ module.exports.getRanking = function (req, res, next) {
                 }
             });
         } else {
-            next();
+            res.json([]);
+
         }
     });
 
