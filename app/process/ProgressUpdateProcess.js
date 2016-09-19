@@ -202,6 +202,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                             });
                         }else {
                             logger.verbose("No progress found for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                            callback();
                         }
                     });
                 }, function (error) {
