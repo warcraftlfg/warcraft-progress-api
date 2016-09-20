@@ -55,7 +55,7 @@ module.exports.getRank = function (req, res, next) {
                                     if (rank != null) {
                                         var result = {};
                                         result['rank'] = rank + 1;
-                                        result['type'] = realm.bnet.locale + "_" + zoneArray[0];
+                                        result['type'] = realm.bnet.locale + "#" + zoneArray[0];
                                         callback(error, result)
                                     } else {
                                         callback(error, null)
