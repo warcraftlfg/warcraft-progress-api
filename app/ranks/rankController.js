@@ -126,7 +126,7 @@ module.exports.getRanking = function (req, res, next) {
 
     async.waterfall([
         function (callback) {
-            var key = req.params.tier;
+            var key = req.params.tier+"#"+req.params.raid;
             if (req.params.realm && req.params.region) {
                 realmModel.findOne({
                     region: req.params.region,
