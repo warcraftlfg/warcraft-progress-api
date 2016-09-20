@@ -27,8 +27,13 @@ WeeklyCronProcess.prototype.runCron = function () {
             },
             function(ranking,callback) {
                 async.forEachSeries(ranking,function(guildStr,callback){
-                    var guildArray = guildStr.split('#');
+                    var guildArray = guildStr.split('-');
 
+                    //Fix realm with - ... silly choice ...
+                    if(guildArray.length ==4){
+                        guildArray[1] = guildArray[1]+"-"+guildArray[2];
+                        guildArray[2] = guildArray[3];
+                    }
                     updateModel.insert("wp_gu", guildArray[0], guildArray[1], guildArray[2], 3, function (error) {
                         logger.info("Insert guild progress %s-%s-%s to update with priority 3", guildArray[0], guildArray[1], guildArray[2]);
                         if(error){
