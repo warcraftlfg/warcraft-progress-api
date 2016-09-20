@@ -186,7 +186,7 @@ module.exports.getRanking = function (req, res, next) {
                                 var difficulties = ["normal", "heroic", "mythic"];
                                 difficulties.forEach(function (difficulty) {
                                     raid.bosses.forEach(function (boss) {
-                                        project["progress.tier_" + req.params.tier + "." + req.params.raid + "." + difficulty + "." + boss] = {$size: {$ifNull: ["$progress.tier_" + req.params.tier + "." + difficulty + "." + boss + ".timestamps", []]}};
+                                        project["progress.tier_" + req.params.tier + "." + req.params.raid + "." + difficulty + "." + boss] = {$size: {$ifNull: ["$progress.tier_" + req.params.tier + "." + req.params.raid + "." + difficulty + "." + boss + ".timestamps", []]}};
                                     });
                                 });
                             }
