@@ -172,7 +172,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                         if (realm && realm.connected_realms && realm.bnet && realm.bnet.locale && realm.bnet.timezone) {
                                             async.parallel([
                                                 function (callback) {
-                                                    rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + guildProgress.region + realm.connected_realms.join('#'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                    rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + guildProgress.region + "#" +realm.connected_realms.join('#'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
                                                         logger.verbose("Update Realm Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
                                                         callback(error);
                                                     });
