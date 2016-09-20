@@ -133,17 +133,17 @@ module.exports.getRanking = function (req, res, next) {
                     name: req.params.realm
                 }, {connected_realms: 1}, function (error, realm) {
                     if (realm) {
-                        key = "tier_" + req.params.tier + "#" + req.params.tier + "#" + req.params.region + "#" + realm.connected_realms.join('#');
+                        key = "tier_" + req.params.tier + "#" + req.params.raid + "#" + req.params.region + "#" + realm.connected_realms.join('#');
                         callback(error, key);
                     } else {
                         callback(new Error("Realm %s-%s not found", req.params.region, req.params.realm));
                     }
                 });
             } else if (req.params.region) {
-                key = "tier_" + req.params.tier + "#" + req.params.tier + "#" + req.params.region;
+                key = "tier_" + req.params.tier + "#" + req.params.raid + "#" + req.params.region;
                 callback(null, key);
             } else if (req.params.locale) {
-                key = "tier_" + req.params.tier + "#" + req.params.tier + "#" + req.params.locale;
+                key = "tier_" + req.params.tier + "#" + req.params.raid + "#" + req.params.locale;
                 callback(null, key);
             } else {
                 callback(null, key);
