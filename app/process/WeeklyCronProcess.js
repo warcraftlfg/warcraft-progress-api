@@ -21,7 +21,7 @@ WeeklyCronProcess.prototype.runCron = function () {
         async.waterfall([
             function(callback){
                 //Load all guild in progress
-                rankModel.getRanking("tier_18",0,999999,function(error,ranking){
+                rankModel.getRanking("tier_18_us",0,999999,function(error,ranking){
                     callback(error,ranking);
                 });
             },
