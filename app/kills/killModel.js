@@ -83,7 +83,8 @@ module.exports.getRoster = function (raid, region, realm, name, difficulty, boss
         characterRole: 1,
         characterLevel: 1,
         characterClass: 1,
-        characterAverageItemLevelEquipped: 1
+        characterAverageItemLevelEquipped: 1,
+        _id:-1
     };
 
     collection.find(criteria, projection).sort({characterName: 1}).toArray(function (error, players) {
