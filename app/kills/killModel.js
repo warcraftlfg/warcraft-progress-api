@@ -68,11 +68,11 @@ module.exports.getRoster = function (raid, region, realm, name, difficulty, boss
     var criteria = {region: region, guildRealm: realm, guildName: name, difficulty: difficulty, boss: boss};
 
     if (timestamps.length == 1) {
-        criteria["timestamp"] = timestamps;
+        criteria["timestamp"] = parseInt(timestamps,10);
     } else {
         criteria["$or"] = [];
         timestamps.forEach(function (timestamp) {
-            criteria["$or"].push({timestamp: timestamp})
+            criteria["$or"].push({timestamp: parseInt(timestamp,10)})
         });
     }
 
