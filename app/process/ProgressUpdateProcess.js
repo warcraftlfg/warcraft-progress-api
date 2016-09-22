@@ -59,9 +59,9 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                             killModel.aggregateKills(raid.name, difficulty, boss, guildProgress.region, guildProgress.realm, guildProgress.name, function (error, kills) {
                                 for (var i = 0; i < kills.length; i++) {
 
-                                    var currentKill = {timestamp: kills[i]._id.timestamp, count: kills[i].count};
+                                    var currentKill = {timestamp: kills[i]._id, count: kills[i].count};
                                     if (i + 1 < kills.length) {
-                                        var nextKill = {timestamp: kills[i + 1]._id.timestamp, count: kills[i + 1].count};
+                                        var nextKill = {timestamp: kills[i + 1]._id, count: kills[i + 1].count};
                                         if (currentKill.timestamp + 1000 == nextKill.timestamp) {
                                             if (difficulty == "mythic") {
                                                 if (currentKill.count + nextKill.count >= 16) {
