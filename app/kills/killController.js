@@ -9,7 +9,7 @@ module.exports.getKill = function (req, res, next) {
     var logger = applicationStorage.logger;
     logger.info("%s %s %s %s", req.headers['x-forwarded-for'] || req.connection.remoteAddress, req.method, req.path, JSON.stringify(req.params));
 
-    killModel.find(
+    killModel.getRoster(
         req.params.raid,
         req.params.region,
         req.params.realm,
