@@ -47,18 +47,18 @@ module.exports.aggregateKills = function (raid, difficulty, boss, region, realm,
             }
         },
         {
-            $sort: {
-                timestamp: 1
-            }
-        },
-        {
             $group: {
                 _id: {
                     timestamp: "$timestamp"
                 },
                 count: {$sum: 1}
             }
-        }
+        },
+        {
+            $sort: {
+                timestamp: 1
+            }
+        },
     ]).toArray(function (error, result) {
         callback(error, result);
     });
