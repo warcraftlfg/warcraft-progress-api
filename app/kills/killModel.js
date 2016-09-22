@@ -61,3 +61,32 @@ module.exports.aggregateKills = function (raid, difficulty, boss, region, realm,
         callback(error, result);
     });
 };
+
+module.exports.getRoster = function (raid, region, realm, name, difficulty, boss, timestamps, callback) {
+    var collection = applicationStorage.mongo.collection(raid);
+
+    var criteria = {region: region, guildRealm: realm, guildName: name, difficulty: difficulty, boss: boss};
+
+    if (timestamps.length == 1) {
+        criteria["timestamp"] = timestamps;
+    } else {
+        criteria["$or"] = [];
+        timestamps.forEach(function (timestamp) {
+            criteria["$or"].push({timestamp: timestamp})
+        });
+    }
+
+    var projection = {
+        characterRealm: 1,
+        characterName: 1,
+        characterSpec: 1,
+        characterRole: 1,
+        characterLevel: 1,
+        characterClass: 1,
+        characterAverageItemLevelEquipped: 1
+    };
+
+    collection.find(criteria, projection).sort({characterName: 1}).toArray(function (error, players) {
+        callback(error, players);
+    })
+};
