@@ -54,7 +54,7 @@ module.exports.aggregateKills = function (raid, difficulty, boss, region, realm,
         },
         {
             $sort: {
-                timestamp: 1
+                timestamp: -1
             }
         },
     ]).toArray(function (error, result) {
