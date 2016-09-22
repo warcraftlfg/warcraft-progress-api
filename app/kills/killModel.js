@@ -38,7 +38,7 @@ module.exports.aggregateKills = function (raid, difficulty, boss, region, realm,
 
     collection.aggregate([
         {
-            $match:{
+            $match: {
                 region: region,
                 guildRealm: realm,
                 guildName: name,
@@ -54,7 +54,7 @@ module.exports.aggregateKills = function (raid, difficulty, boss, region, realm,
         },
         {
             $sort: {
-                timestamp: -1
+                _id: 1
             }
         },
     ]).toArray(function (error, result) {
