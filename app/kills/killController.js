@@ -16,7 +16,7 @@ module.exports.getKill = function (req, res, next) {
         req.params.name,
         req.params.difficulty,
         req.params.boss,
-        req.params.timestamps.split(','),
+        req.params.timestamp.split(','),
         function (error, players) {
             if (error) {
                 logger.error(error.message);
