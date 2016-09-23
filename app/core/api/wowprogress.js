@@ -55,7 +55,7 @@ module.exports.getGuildsUrlsOnPage = function (number, callback) {
 
 };
 
-module.exports.getGuildsOnPage = function(number,callback){
+module.exports.getGuildsOnPage = function (number, callback) {
     var self = this;
     async.waterfall([
         function (callback) {
@@ -74,8 +74,18 @@ module.exports.getGuildsOnPage = function(number,callback){
 
             var guildParts = [];
             $('body').find('.ratingContainer table.rating tr a.guild').each(function (i, elem) {
-                var guildPart = $(this).attr('href').split('/');
-                guildParts.push({region:guildPart[2],realm:guildPart[3],name:guildPart[4]});
+                var region = $(this).attr('href').split('/')[2];
+
+                var tmp = $(this).attr('data-hint').split('>');
+
+                var name = tmp[0].split('Guild <')[1];
+                var realmArray = tmp[1].split('-');
+                if (realmArray.length == 2) {
+                    var realm = realmArray[1];
+                } else {
+                    var realm = realmArray[1]+'-' + realmArray[2];
+                }
+                guildParts.push({region: region, realm: realm, name: name});
             });
 
             callback(null, guildParts);
@@ -130,7 +140,7 @@ module.exports.getKills = function (url, callback) {
                         logger.verbose("Insert GuildProgress to update %s-%s-%s with priority %s", region, realm, name, 3);
                         callback(true);
                     });
-                }else {
+                } else {
                     //Speed don't parse other ...
                     return callback(true); //TO REMOVE TO IMPORT OTHERS
 
