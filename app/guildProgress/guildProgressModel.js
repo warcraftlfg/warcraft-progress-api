@@ -94,7 +94,7 @@ module.exports.getBossKillCount = function (tier, raid, difficulty, boss, callba
     var collection = applicationStorage.mongo.collection("guilds_progress");
 
     var criteria = {};
-    criteria['progress.tier_' + tier + "." + raid + "." + difficulty + "." + boss + ".timestamps.1"] = {$exists: true};
+    criteria['progress.tier_' + tier + "." + raid + "." + difficulty + "." + boss + ".timestamps.0"] = {$exists: true};
     collection.count(criteria, function (error, count) {
         callback(error, count);
     });
