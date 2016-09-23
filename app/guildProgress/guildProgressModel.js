@@ -89,3 +89,14 @@ module.exports.aggregate = function (criteria, project, callback) {
         callback(error, results);
     });
 };
+
+module.exports.getBossKillCount = function (tier, raid, difficulty, boss, callback) {
+    var collection = applicationStorage.mongo.collection("guilds_progress");
+
+    var criteria = {};
+    criteria['progress.tier_' + tier + "." + raid + "." + difficulty + "." + boss + ".timestamps.1"] = {$exists: true};
+    collection.count(criteria, function (error, count) {
+        callback(error, count);
+    });
+};
+
