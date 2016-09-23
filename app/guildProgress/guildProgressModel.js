@@ -100,3 +100,31 @@ module.exports.getBossKillCount = function (tier, raid, difficulty, boss, callba
     });
 };
 
+module.exports.getGuildProgressDifficultyCount = function (tier, raid, difficulty, callback) {
+    var collection = applicationStorage.mongo.collection("guilds_progress");
+
+    var criteria = {};
+    criteria['progress.tier_' + tier + "." + raid + "." + difficulty+"Count"] = {$gt: 0};
+    collection.count(criteria, function (error, count) {
+        callback(error, count);
+    });
+};
+
+module.exports.getGuildProgressCount = function (tier, raid, callback) {
+    var collection = applicationStorage.mongo.collection("guilds_progress");
+    var config = applicationStorage.config;
+
+
+    var or = [];
+    config.progress.difficulties.forEach(function(difficulty){
+        var tmp ={};
+        tmp['progress.tier_' + tier + "." + raid + "." + difficulty+"Count"] = {$gt: 0};
+        or.push(tmp);
+    });
+    var criteria = {"$or":or};
+
+    collection.count(criteria, function (error, count) {
+        callback(error, count);
+    });
+};
+
