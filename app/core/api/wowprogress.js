@@ -55,6 +55,37 @@ module.exports.getGuildsUrlsOnPage = function (number, callback) {
 
 };
 
+module.exports.getGuildsOnPage = function(number,callback){
+    var self = this;
+    async.waterfall([
+        function (callback) {
+            if (number == -1) {
+                var url = "/pve/rating/next";
+            } else {
+                var url = "/pve/rating/next/" + number + "/rating";
+            }
+            self.getWoWProgressPage(url, function (error, body) {
+                callback(error, body)
+            })
+        },
+        function (body, callback) {
+            var $ = cheerio.load(body);
+
+
+            var guildParts = [];
+            $('body').find('.ratingContainer table.rating tr a.guild').each(function (i, elem) {
+                var guildPart = $(this).attr('href').split('/');
+                guildParts.push({region:guildPart[2],realm:guildPart[3],name:guildPart[4]});
+            });
+
+            callback(null, guildParts);
+        }
+    ], function (error, guildParts) {
+        callback(error, guildParts);
+    })
+
+};
+
 module.exports.getKills = function (url, callback) {
     var self = this;
     var logger = applicationStorage.logger;
