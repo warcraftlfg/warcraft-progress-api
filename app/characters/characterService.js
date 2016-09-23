@@ -100,7 +100,11 @@ module.exports.parseProgress = function (region, character, callback) {
                             });
                         }
                     ], function (error) {
-                        callback(error);
+                        if (error == true) {
+                            callback();
+                        } else {
+                            callback(error);
+                        }
                     });
                 }, function (error) {
                     callback(error);
