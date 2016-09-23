@@ -70,7 +70,7 @@ ProgressImportProcess.prototype.import = function () {
                                 callback();
 
                             } else {
-                                updateModel.insert("wp_pu", guild.region, bnetGuild.realm, bnetGuild.name, 10, function (error) {
+                                updateModel.insert("wp_gu", guild.region, bnetGuild.realm, bnetGuild.name, 10, function (error) {
                                     logger.verbose("Set Progress to update for guild %s-%s-%s ", guild.region, bnetGuild.realm, bnetGuild.name);
                                     callback(error);
                                 });

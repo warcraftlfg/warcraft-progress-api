@@ -85,6 +85,9 @@ module.exports.getGuildsOnPage = function (number, callback) {
                 } else {
                     var realm = realmArray[1]+'-' + realmArray[2];
                 }
+
+                if(realm == 'Aggra')
+                    realm = "aggra-portuges";
                 guildParts.push({region: region, realm: realm, name: name});
             });
 
