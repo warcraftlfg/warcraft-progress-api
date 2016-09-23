@@ -26,7 +26,7 @@ module.exports.insertOne = function (tier, raid, stats, callback) {
 module.exports.getStats = function (tier, raid, limit, callback) {
     var collection = applicationStorage.mongo.collection("progress_stats");
     collection.find({tier: tier, raid: raid}, {stats:1})
-        .sort({_id: -1})
+        .sort({_id: 1})
         .limit(limit)
         .toArray(function (error, stats) {
             console.log(stats);
