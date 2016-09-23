@@ -70,6 +70,11 @@ if (process.argv.indexOf("-wcron") != -1) {
     processNames.push("WeeklyCronProcess");
 }
 
+// -bgcron start BestGuildsCronProcess
+if (process.argv.indexOf("-bgcron") != -1) {
+    processNames.push("BestGuildsCronProcess");
+}
+
 //Load config file
 var env = process.env.NODE_ENV || "development";
 var config = process.require("config/config.json");

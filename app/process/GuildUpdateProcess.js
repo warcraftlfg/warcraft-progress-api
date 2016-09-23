@@ -45,23 +45,10 @@ GuildUpdateProcess.prototype.updateGuild = function () {
                 });
             },
             function (guildUpdate, callback) {
-                if (guildUpdate.priority == 0) {
+                if (guildUpdate.priority == 0 || guildUpdate.priority == 3 || guildUpdate.priority == 5) {
                     updateModel.getCount("wp_cu", 0, function (error, count) {
                         if (count > 10000) {
                             logger.info("Too many characters in priority 0 ... waiting 1 min ");
-                            updateModel.insert("wp_gu", guildUpdate.region, guildUpdate.realm, guildUpdate.name, guildUpdate.priority, function () {
-                                setTimeout(function () {
-                                    callback(true);
-                                }, 60000);
-                            });
-                        } else {
-                            callback(error, guildUpdate);
-                        }
-                    });
-                } else if (guildUpdate.priority == 3) {
-                    updateModel.getCount("wp_cu", 3, function (error, count) {
-                        if (count > 10000) {
-                            logger.info("Too many characters in priority 3 ... waiting 1 min ");
                             updateModel.insert("wp_gu", guildUpdate.region, guildUpdate.realm, guildUpdate.name, guildUpdate.priority, function () {
                                 setTimeout(function () {
                                     callback(true);
