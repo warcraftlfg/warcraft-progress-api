@@ -63,7 +63,7 @@ ProgressImportProcess.prototype.import = function () {
                     });
                 },
                 function (guilds, callback) {
-                    async.eachSeries(guilds, function (guild, callback) {
+                    async.each(guilds, function (guild, callback) {
                         bnetAPI.getGuild(guild.region, decodeURI(guild.realm), decodeURI(guild.name.replace(/\+/g, ' ')), [], function (error, bnetGuild) {
                             if (!bnetGuild || !bnetGuild.realm || !bnetGuild.name) {
                                 logger.warn("Bnet return empty guild %s-%s-%s, skip it", guild.region, guild.realm, guild.name);
