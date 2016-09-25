@@ -72,12 +72,14 @@ StatsCronProcess.prototype.runCron = function () {
                                     callback(error);
                                 });
                             }
-                        ],
-                        function (callback) {
-                            //Character stats
-                            callback();
+                        ],function(error){
+                            callback(error);
                         }
                     );
+                },
+                function (callback) {
+                    //Character stats
+                    callback();
                 }
             ], function (error) {
                 callback(error);
