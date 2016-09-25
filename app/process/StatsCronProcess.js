@@ -23,7 +23,6 @@ StatsCronProcess.prototype.runCron = function () {
 
             async.series([
                 function (callback) {
-                return callback();
                     //Boss stats
                     async.waterfall([
                             function (callback) {
