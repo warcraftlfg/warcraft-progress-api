@@ -6,7 +6,7 @@ var applicationStorage = process.require("core/applicationStorage.js");
 var statModel = process.require("stats/statModel.js");
 
 
-module.exports.getBossStats = function (req, res, next) {
+module.exports.getGuildStats = function (req, res, next) {
     var logger = applicationStorage.logger;
     logger.info("%s %s %s %s", req.headers['x-forwarded-for'] || req.connection.remoteAddress, req.method, req.path, JSON.stringify(req.params));
 
@@ -21,6 +21,22 @@ module.exports.getBossStats = function (req, res, next) {
         }
     }
     statModel.getStats(parseInt(req.params.tier, 10), req.params.raid, "guild", limit, function (error, stats) {
+        if (error) {
+            logger.error(error.message);
+            res.status(500).send(error.message);
+        } else if (stats) {
+            res.json(stats);
+        } else {
+            next();
+        }
+    });
+};
+
+module.exports.getCharacterClassStats = function (req, res, next) {
+    var logger = applicationStorage.logger;
+    logger.info("%s %s %s %s", req.headers['x-forwarded-for'] || req.connection.remoteAddress, req.method, req.path, JSON.stringify(req.params));
+
+    statModel.getStats(parseInt(req.params.tier, 10), req.params.raid, "characterClass", 1, function (error, stats) {
         if (error) {
             logger.error(error.message);
             res.status(500).send(error.message);

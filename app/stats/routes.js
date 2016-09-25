@@ -5,8 +5,8 @@ var router = require("express").Router();
 var statController = process.require("stats/statController.js");
 
 //Define routes
-router.get('/stats/guild/:tier/:raid/', statController.getBossStats);
-router.get('/stats/class/:tier/:raid/', statController.getBossStats);
+router.get('/stats/guild/:tier/:raid/', statController.getGuildStats);
+router.get('/stats/character/class/:tier/:raid/', statController.getCharacterClassStats);
 
 
 module.exports = router;
