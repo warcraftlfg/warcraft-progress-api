@@ -10,26 +10,25 @@ var applicationStorage = process.require("core/applicationStorage");
  * @param stat
  * @param callback
  */
-module.exports.insertOne = function (tier, raid, stats, callback) {
+module.exports.insertOne = function (tier, raid, type, stats, callback) {
     var collection = applicationStorage.mongo.collection("progress_stats");
-    var obj = {tier: tier, raid: raid, stats: stats}
+    var obj = {tier: tier, raid: raid, type: type, stats: stats}
     collection.insertOne(obj, function (error) {
         callback(error);
     });
 };
 
 /**
- * Return the last stat (max 200)
+ * Return the last stat
  * @param raid
  * @param callback
  */
-module.exports.getStats = function (tier, raid, limit, callback) {
+module.exports.getStats = function (tier, raid, type, limit, callback) {
     var collection = applicationStorage.mongo.collection("progress_stats");
-    collection.find({tier: tier, raid: raid}, {stats:1,_id:1})
+    collection.find({tier: tier, raid: raid, type: type}, {stats: 1, _id: 1})
         .sort({_id: -1})
         .limit(limit)
         .toArray(function (error, stats) {
-            console.log(stats);
             callback(error, stats);
         });
 

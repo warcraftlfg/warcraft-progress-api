@@ -20,7 +20,7 @@ module.exports.getBossStats = function (req, res, next) {
             limit = 1;
         }
     }
-    statModel.getStats(parseInt(req.params.tier, 10), req.params.raid, limit, function (error, stats) {
+    statModel.getStats(parseInt(req.params.tier, 10), req.params.raid, "guild", limit, function (error, stats) {
         if (error) {
             logger.error(error.message);
             res.status(500).send(error.message);

@@ -20,61 +20,69 @@ StatsCronProcess.prototype.runCron = function () {
 
     async.forEach(config.progress.raids, function (raid, callback) {
 
-            async.waterfall([
-                    function (callback) {
-                        var stats = {};
-                        async.parallel([
+            async.series([
+                function (callback) {
+                    //Boss stats
+                    async.waterfall([
                             function (callback) {
-                                async.eachSeries(config.progress.difficulties, function (difficulty, callback) {
-                                    stats[difficulty] = {};
-                                    async.parallel([
-                                        function (callback) {
-                                            async.eachSeries(raid.bosses, function (boss, callback) {
-                                                guildProgressModel.getBossKillCount(raid.tier, raid.name, difficulty, boss, function (error, count) {
-                                                    stats[difficulty][boss] = count;
-                                                    callback(error);
-                                                });
-                                            }, function (error) {
+                                var stats = {};
+                                async.series([
+                                    function (callback) {
+                                        async.eachSeries(config.progress.difficulties, function (difficulty, callback) {
+                                            stats[difficulty] = {};
+                                            async.series([
+                                                function (callback) {
+                                                    async.eachSeries(raid.bosses, function (boss, callback) {
+                                                        guildProgressModel.getBossKillCount(raid.tier, raid.name, difficulty, boss, function (error, count) {
+                                                            stats[difficulty][boss] = count;
+                                                            callback(error);
+                                                        });
+                                                    }, function (error) {
+                                                        callback(error);
+                                                    });
+                                                },
+                                                function (callback) {
+                                                    guildProgressModel.getGuildProgressDifficultyCount(raid.tier, raid.name, difficulty, function (error, count) {
+                                                        stats[difficulty + "Count"] = count;
+                                                        callback(error);
+                                                    });
+                                                }
+                                            ], function (error) {
                                                 callback(error);
-                                            });
-                                        },
-                                        function (callback) {
-                                            guildProgressModel.getGuildProgressDifficultyCount(raid.tier, raid.name, difficulty, function (error, count) {
-                                                stats[difficulty + "Count"] = count;
-                                                callback(error);
-                                            });
-                                        }
-                                    ], function (error) {
-                                        callback(error);
-                                    })
+                                            })
 
-                                }, function (error) {
-                                    callback(error);
+                                        }, function (error) {
+                                            callback(error);
+                                        });
+                                    },
+                                    function (callback) {
+                                        guildProgressModel.getGuildProgressCount(raid.tier, raid.name, function (error, count) {
+                                            stats["count"] = count;
+                                            callback(error);
+                                        });
+                                    }
+                                ], function (error) {
+                                    callback(error, stats);
                                 });
+
                             },
-                            function (callback) {
-                                guildProgressModel.getGuildProgressCount(raid.tier, raid.name, function (error, count) {
-                                    stats["count"] = count;
+
+                            function (stats, callback) {
+                                statModel.insertOne(raid.tier, raid.name, "guild", stats, function (error) {
                                     callback(error);
                                 });
                             }
-                        ], function (error) {
-                            callback(error, stats);
-                        });
-
-                    },
-
-                    function (stats, callback) {
-                        statModel.insertOne(raid.tier, raid.name, stats, function (error) {
-                            callback(error);
-                        });
-                    }
-                ],
-                function (error) {
-                    callback(error);
+                        ],
+                        function (callback) {
+                            //Character stats
+                            callback();
+                        }
+                    );
                 }
-            )
-            ;
+            ], function (error) {
+                callback(error);
+            });
+
         }, function (error) {
             if (error) {
                 logger.error(error.message);
