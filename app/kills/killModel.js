@@ -68,11 +68,11 @@ module.exports.getRoster = function (raid, region, realm, name, difficulty, boss
     var criteria = {region: region, guildRealm: realm, guildName: name, difficulty: difficulty, boss: boss};
 
     if (timestamps.length == 1) {
-        criteria["timestamp"] = parseInt(timestamps,10);
+        criteria["timestamp"] = parseInt(timestamps, 10);
     } else {
         criteria["$or"] = [];
         timestamps.forEach(function (timestamp) {
-            criteria["$or"].push({timestamp: parseInt(timestamp,10)})
+            criteria["$or"].push({timestamp: parseInt(timestamp, 10)})
         });
     }
 
@@ -84,10 +84,32 @@ module.exports.getRoster = function (raid, region, realm, name, difficulty, boss
         characterLevel: 1,
         characterClass: 1,
         characterAverageItemLevelEquipped: 1,
-        _id:0
+        _id: 0
     };
 
     collection.find(criteria, projection).sort({characterName: 1}).toArray(function (error, players) {
         callback(error, players);
     })
+};
+
+module.exports.getStatsByClass = function (raid, callback) {
+    var collection = applicationStorage.mongo.collection(raid);
+
+    collection.aggregate([
+        {
+
+            $group: {
+                _id: {
+                    difficulty: "$difficulty",
+                    boss: "$boss",
+                    characterClass: "$characterClass",
+                },
+                count: {$sum: 1}
+            }
+        },
+
+    ]).toArray(function (error, result) {
+        callback(error, result);
+    });
+
 };

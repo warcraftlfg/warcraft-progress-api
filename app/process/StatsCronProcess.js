@@ -5,6 +5,7 @@ var async = require("async");
 var applicationStorage = process.require("core/applicationStorage.js");
 var guildProgressModel = process.require("guildProgress/guildProgressModel.js");
 var statModel = process.require("stats/statModel.js");
+var killModel = process.require("kills/killModel.js");
 
 
 /**
@@ -22,6 +23,7 @@ StatsCronProcess.prototype.runCron = function () {
 
             async.series([
                 function (callback) {
+                return callback();
                     //Boss stats
                     async.waterfall([
                             function (callback) {
@@ -79,7 +81,30 @@ StatsCronProcess.prototype.runCron = function () {
                 },
                 function (callback) {
                     //Character stats
-                    callback();
+                    async.waterfall([
+                        function(callback){
+                            killModel.getStatsByClass(raid.name,function(error,result){
+                                var stats = [];
+                                result.forEach(function(stat){
+                                    stats.push({
+                                        difficulty:stat._id.difficulty,
+                                        boss:stat._id.boss,
+                                        class:stat._id.characterClass,
+                                        count:stat.count
+                                    });
+                                });
+                                callback(error,stats);
+                            })
+                        },
+                        function(stats,callback){
+                            statModel.insertOne(raid.tier, raid.name, "characterClass", stats, function (error) {
+                                callback(error);
+                            });
+                        }
+                    ],function(error){
+                        callback(error);
+                    });
+
                 }
             ], function (error) {
                 callback(error);
