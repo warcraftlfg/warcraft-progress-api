@@ -21,7 +21,7 @@ BestGuildsCronProcess.prototype.runCron = function () {
         async.waterfall([
             function(callback){
                 //Load all guild in progress
-                rankModel.getRanking("tier_"+raid.tier+"#"+raid.name,0,500,function(error,ranking){
+                rankModel.getRanking("tier_"+raid.tier+"#"+raid.name,0,1500,function(error,ranking){
                     callback(error,ranking);
                 });
             },
