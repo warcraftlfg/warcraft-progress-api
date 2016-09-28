@@ -21,7 +21,7 @@ module.exports.setMembersToUpdate = function (region, realm, name, members, prio
     logger.info("Insert %s character(s) to update",members.length)
     async.each(members, function (member, callback) {
         if (member.character.level >= config.levelMax) {
-            updateModel.insert("wp_cu", region, member.character.realm, member.character.name, priority <= 5 ? priority : 3, function (error) {
+            updateModel.insert("wp_cu", region, member.character.realm, member.character.name, priority, function (error) {
                 logger.verbose("Insert character to update %s-%s-%s with priority", region, member.character.realm, member.character.name, priority <= 5 ? priority : 3);
                 callback(error);
             });
