@@ -175,6 +175,9 @@ module.exports.getRanking = function (req, res, next) {
                             if (guild && guild.ad && guild.ad.lfg == true) {
                                 finalRanking[start + counter]["lfg"] = true;
                             }
+                            if (guild && guild.parser && guild.parser.active == true) {
+                                finalRanking[start + counter]["parser"] = true;
+                            }
                             callback(error);
                         });
                     },

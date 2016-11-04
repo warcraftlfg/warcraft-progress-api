@@ -79,6 +79,12 @@ if (process.argv.indexOf("-scron") != -1) {
     processNames.push("StatsCronProcess");
 }
 
+// -scron start StatsCronProcess
+if (process.argv.indexOf("-npc") != -1) {
+    processNames.push("NewsParsingCronProcess");
+}
+
+
 //Load config file
 var env = process.env.NODE_ENV || "development";
 var config = process.require("config/config.json");

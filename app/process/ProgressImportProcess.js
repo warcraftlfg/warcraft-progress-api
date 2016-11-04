@@ -44,7 +44,7 @@ ProgressImportProcess.prototype.import = function () {
     var logger = applicationStorage.logger;
     var self = this;
 
-    var maxPage = 30;
+    var maxPage = 3000;
     var count = -1;
     async.whilst(
         function () {

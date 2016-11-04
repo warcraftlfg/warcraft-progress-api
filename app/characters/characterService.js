@@ -76,7 +76,7 @@ module.exports.parseProgress = function (region, character, callback) {
                                 });
                         },
                         function (callback) {
-                            logger.verbose('Insert Kill %s-%s-%s for %s-%s-%s ', raid.name, difficulty, boss, region, character.guild.realm, character.guild.name);
+                            logger.verbose('Insert Kill %s-%s-%s for %s-%s-%s ', raid.name, difficulty, boss.name, region, character.guild.realm, character.guild.name);
 
                             var obj = {
                                 region: region,

@@ -9,7 +9,7 @@ var guildProgressModel = process.require("guildProgress/guildProgressModel.js");
 var killModel = process.require("kills/killModel.js");
 var rankModel = process.require("ranks/rankModel.js");
 var realmModel = process.require("realms/realmModel.js");
-var bnetAPI = process.require("core/api/bnet.js");
+
 
 /**
  * ProgressUpdateProcess constructor
@@ -51,23 +51,38 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
 
                     var progress = {normalCount: 0, heroicCount: 0, mythicCount: 0};
 
-
                     async.eachSeries(["normal", "heroic", "mythic"], function (difficulty, callback) {
                         progress[difficulty] = {};
                         async.eachSeries(raid.bosses, function (boss, callback) {
                             progress[difficulty][boss] = {timestamps: [], irrelevantTimestamps: []};
                             killModel.aggregateKills(raid.name, difficulty, boss, guildProgress.region, guildProgress.realm, guildProgress.name, function (error, kills) {
+                                var mythicNewsProgressTimestamps = [];
+
                                 for (var i = 0; i < kills.length; i++) {
 
-                                    var currentKill = {timestamp: kills[i]._id, count: kills[i].count};
+                                    var currentKill = {
+                                        timestamp: kills[i]._id.timestamp,
+                                        count: kills[i].count,
+                                        source: kills[i]._id.source
+                                    };
                                     if (i + 1 < kills.length) {
-                                        var nextKill = {timestamp: kills[i + 1]._id, count: kills[i + 1].count};
-                                        if (currentKill.timestamp + 1000 == nextKill.timestamp) {
+                                        var nextKill = {
+                                            timestamp: kills[i + 1]._id.timestamp,
+                                            count: kills[i + 1].count,
+                                            source: kills[i + 1]._id.source
+                                        };
+                                        if (currentKill.timestamp + 1000 == nextKill.timestamp && currentKill.source == nextKill.source) {
                                             if (difficulty == "mythic") {
-                                                if (currentKill.count + nextKill.count >= 8) {
-                                                    progress[difficulty][boss]["timestamps"].push([currentKill.timestamp, nextKill.timestamp]);
+                                                if (currentKill.count + nextKill.count >= 16) {
+                                                    if (currentKill.source == "news") {
+                                                        mythicNewsProgressTimestamps.push([currentKill.timestamp, nextKill.timestamp]);
+                                                    } else {
+                                                        progress[difficulty][boss]["timestamps"].push([currentKill.timestamp, nextKill.timestamp]);
+                                                    }
                                                 } else {
-                                                    progress[difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp, nextKill.timestamp]);
+                                                    if (currentKill.source != "news") {
+                                                        progress[difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp, nextKill.timestamp]);
+                                                    }
                                                 }
                                             } else {
                                                 if (currentKill.count + nextKill.count >= 8) {
@@ -84,19 +99,52 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
 
                                     //One timestamp kill
                                     if (difficulty == "mythic") {
-                                        if (currentKill.count >= 8) {
-                                            progress[difficulty][boss]["timestamps"].push([currentKill.timestamp]);
+                                        if (currentKill.count >= 16) {
+                                            if (currentKill.source == "news") {
+                                                mythicNewsProgressTimestamps.push([currentKill.timestamp]);
+                                            } else {
+                                                progress[difficulty][boss]["timestamps"].push([currentKill.timestamp]);
+                                            }
                                         } else {
-                                            progress[difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp]);
+                                            if (currentKill.source != "news") {
+                                                progress[difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp]);
+                                            }
                                         }
                                     } else {
                                         if (currentKill.count >= 8) {
                                             progress[difficulty][boss]["timestamps"].push([currentKill.timestamp]);
                                         } else {
                                             progress[difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp]);
+
                                         }
                                     }
                                 }
+
+                                /**
+                                 * Add news timestamps if not found in progress mythic
+                                 */
+                                if (difficulty == "mythic" && mythicNewsProgressTimestamps.length > 0) {
+                                    var tmp = [];
+                                    var k = 0;
+
+                                    for (var j = 0; j < progress[difficulty][boss]["timestamps"].length; j++) {
+                                        if (mythicNewsProgressTimestamps[k][0] < progress[difficulty][boss]["timestamps"][j][0]) {
+                                            if (mythicNewsProgressTimestamps[k][0] + 60000 >= progress[difficulty][boss]["timestamps"][j][0]) {
+                                                tmp.push(progress[difficulty][boss]["timestamps"][j])
+                                            } else {
+                                                tmp.push(mythicNewsProgressTimestamps[k]);
+                                                tmp.push(progress[difficulty][boss]["timestamps"][j])
+                                            }
+                                            k++;
+                                        }else{
+                                            tmp.push(progress[difficulty][boss]["timestamps"][j])
+                                        }
+                                        j++
+                                    }
+
+                                    progress[difficulty][boss]["timestamps"] = tmp;
+                                }
+
 
                                 if (progress[difficulty][boss]["timestamps"].length > 0) {
                                     if (progress[difficulty][boss]["timestamps"][0][0] > bestKillTimestamps[difficulty]) {
@@ -125,7 +173,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                             bestKillTimestamps['all'] = bestKillTimestamps['normal'];
                         }
 
-                        if(bestKillTimestamps['all'] != 0) {
+                        if (bestKillTimestamps['all'] != 0) {
                             var preScore = 0;
                             if (progress.normalCount && progress.normalCount > 0) {
                                 preScore = progress.normalCount;
@@ -172,7 +220,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                         if (realm && realm.connected_realms && realm.bnet && realm.bnet.locale && realm.bnet.timezone) {
                                             async.parallel([
                                                 function (callback) {
-                                                    rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + guildProgress.region + "#" +realm.connected_realms.join('#'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                    rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + guildProgress.region + "#" + realm.connected_realms.join('#'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
                                                         logger.verbose("Update Realm Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
                                                         callback(error);
                                                     });
@@ -200,7 +248,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                             ], function (error) {
                                 callback(error);
                             });
-                        }else {
+                        } else {
                             logger.verbose("No progress found for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
                             callback();
                         }

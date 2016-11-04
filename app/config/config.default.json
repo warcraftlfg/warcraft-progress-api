@@ -45,5 +45,129 @@
         ]
       }
     ]
+  },
+  "fastUpdate": {
+    "guilds": [
+      {
+        "region": "eu",
+        "realm": "Howling Fjord",
+        "name": "Экзорсус"
+      },
+      {
+        "region": "eu",
+        "realm": "Tarren Mill",
+        "name": "Method"
+      },
+      {
+        "region": "eu",
+        "realm": "Twisting Nether",
+        "name": "Serenity"
+      },
+      {
+        "region": "eu",
+        "realm": "Sargeras",
+        "name": "From Scratch"
+      },
+      {
+        "region": "eu",
+        "realm": "Sylvanas",
+        "name": "Ðanish Terrace"
+      },
+      {
+        "region": "eu",
+        "realm": "Nathrezim",
+        "name": "set sail for fail"
+      },
+      {
+        "region": "eu",
+        "realm": "Howling Fjord",
+        "name": "Открытость"
+      },
+      {
+        "region": "eu",
+        "realm": "Kazzak",
+        "name": "FatSharkYes"
+      },
+      {
+        "region": "eu",
+        "realm": "The Maelstrom",
+        "name": "ScrubBusters"
+      },
+      {
+        "region": "us",
+        "realm": "Illidan",
+        "name": "Limit"
+      },
+      {
+        "region": "us",
+        "realm": "Sargeras",
+        "name": "Midwinter"
+      },
+      {
+        "region": "eu",
+        "realm": "Draenor",
+        "name": "Pieces"
+      },
+      {
+        "region": "us",
+        "realm": "Frostmourne",
+        "name": "Entropy"
+      },
+      {
+        "region": "eu",
+        "realm": "Ragnaros",
+        "name": "Nova"
+      },
+      {
+        "region": "eu",
+        "realm": "Ravencrest",
+        "name": "Prestige Gaming"
+      },
+      {
+        "region": "eu",
+        "realm": "Tarren Mill",
+        "name": "Prime"
+      },
+      {
+        "region": "us",
+        "realm": "Aerie Peak",
+        "name": "Easy"
+      },
+      {
+        "region": "eu",
+        "realm": "Soulflayer",
+        "name": "Фьюжн"
+      },
+      {
+        "region": "eu",
+        "realm": "Tarren Mill",
+        "name": "NollTvåTre"
+      },
+      {
+        "region": "us",
+        "realm": "Frostmourne",
+        "name": "Honestly"
+      }
+    ],
+    "achievements":[
+      {
+        "id":11396,
+        "boss":"Odyn",
+        "raid":"Trial of Valor",
+        "difficulty":"mythic"
+      },
+      {
+        "id":11397,
+        "boss":"Guarm",
+        "raid":"Trial of Valor",
+        "difficulty":"mythic"
+      },
+      {
+        "id":11398,
+        "boss":"Helya",
+        "raid":"Trial of Valor",
+        "difficulty":"mythic"
+      }
+    ]
   }
 }
