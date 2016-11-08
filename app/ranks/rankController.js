@@ -136,6 +136,10 @@ module.exports.getRanking = function (req, res, next) {
                         key = "tier_" + req.params.tier + "#" + req.params.raid + "#" + req.params.region + "#" + realm.connected_realms.join('#');
                         callback(error, key);
                     } else {
+
+                        res.status(404).send("Realm "+req.params.region+"-"+req.params.realm+" not found");
+                        logger.error("Realm "+req.params.region+"-"+req.params.realm+" not found");
+                        return;
                         callback(new Error("Realm %s-%s not found", req.params.region, req.params.realm));
                     }
                 });
