@@ -136,7 +136,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                                 tmp.push(progress[difficulty][boss]["timestamps"][j])
                                             }
                                             k++;
-                                        }else{
+                                        } else {
                                             tmp.push(progress[difficulty][boss]["timestamps"][j])
                                         }
                                         j++
@@ -165,93 +165,101 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                             return callback(error);
                         }
 
-                        if (bestKillTimestamps['mythic'] != 0) {
-                            bestKillTimestamps['all'] = bestKillTimestamps['mythic'];
-                        } else if (bestKillTimestamps['heroic'] != 0) {
-                            bestKillTimestamps['all'] = bestKillTimestamps['heroic'];
-                        } else if (bestKillTimestamps['normal'] != 0) {
-                            bestKillTimestamps['all'] = bestKillTimestamps['normal'];
-                        }
-
-                        if (bestKillTimestamps['all'] != 0) {
-                            var preScore = 0;
-                            if (progress.normalCount && progress.normalCount > 0) {
-                                preScore = progress.normalCount;
-                            }
-                            if (progress.heroicCount && progress.heroicCount > 0) {
-                                preScore = progress.heroicCount * 100;
-                            }
-                            if (progress.mythicCount && progress.mythicCount > 0) {
-                                preScore = progress.mythicCount * 10000;
-                            }
-
-                            //Calculate the score for redis bestTimestamp - 2Years * score
-                            var score = parseInt(bestKillTimestamps['all'] / 1000, 10) - (3600 * 24 * 365 * 2 * preScore);
-
-                            async.parallel([
-                                function (callback) {
-                                    guildProgressModel.upsertProgress(guildProgress.region, guildProgress.realm, guildProgress.name, raid.tier, raid.name, progress, function (error) {
-                                            logger.verbose("Update Progress for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
-                                            callback(error);
-                                        }
-                                    );
-                                },
-                                function (callback) {
-                                    rankModel.upsert("tier_" + raid.tier + "#" + raid.name, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
-                                        logger.verbose("Update World Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                        async.series([
+                            function (callback) {
+                                guildProgressModel.upsertProgress(guildProgress.region, guildProgress.realm, guildProgress.name, raid.tier, raid.name, progress, function (error) {
+                                        logger.verbose("Update Progress for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
                                         callback(error);
-                                    });
-                                },
-                                function (callback) {
-                                    rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + guildProgress.region, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
-                                        logger.verbose("Update Region Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
-                                        callback(error);
-                                    });
-                                },
-                                function (callback) {
-                                    realmModel.findOne({
-                                        region: guildProgress.region,
-                                        name: guildProgress.realm
-                                    }, {
-                                        connected_realms: 1,
-                                        "bnet.locale": 1,
-                                        "bnet.timezone": 1
-                                    }, function (error, realm) {
-                                        if (realm && realm.connected_realms && realm.bnet && realm.bnet.locale && realm.bnet.timezone) {
-                                            async.parallel([
-                                                function (callback) {
-                                                    rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + guildProgress.region + "#" + realm.connected_realms.join('#'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
-                                                        logger.verbose("Update Realm Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
-                                                        callback(error);
-                                                    });
-                                                },
-                                                function (callback) {
-                                                    var zoneArray = realm.bnet.timezone.split('/');
-                                                    if (zoneArray.length > 0) {
-                                                        rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + realm.bnet.locale + "#" + zoneArray[0], guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
-                                                            logger.verbose("Update Locale Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
-                                                            callback(error);
-                                                        });
-                                                    } else {
-                                                        callback(error)
-                                                    }
-                                                }
-                                            ], function (error) {
-                                                callback(error)
-                                            });
-                                        } else {
-                                            logger.warn("Realm %s-%s not found", guildProgress.region, guildProgress.realm);
-                                            callback(error);
-                                        }
-                                    });
+                                    }
+                                );
+                            },
+                            function (callback) {
+                                if (bestKillTimestamps['mythic'] != 0) {
+                                    bestKillTimestamps['all'] = bestKillTimestamps['mythic'];
+                                } else if (bestKillTimestamps['heroic'] != 0) {
+                                    bestKillTimestamps['all'] = bestKillTimestamps['heroic'];
+                                } else if (bestKillTimestamps['normal'] != 0) {
+                                    bestKillTimestamps['all'] = bestKillTimestamps['normal'];
                                 }
-                            ], function (error) {
-                                callback(error);
-                            });
-                        } else {
-                            logger.verbose("No progress found for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
-                            callback();
-                        }
+
+                                if (bestKillTimestamps['all'] != 0) {
+                                    var preScore = 0;
+                                    if (progress.normalCount && progress.normalCount > 0) {
+                                        preScore = progress.normalCount;
+                                    }
+                                    if (progress.heroicCount && progress.heroicCount > 0) {
+                                        preScore = progress.heroicCount * 100;
+                                    }
+                                    if (progress.mythicCount && progress.mythicCount > 0) {
+                                        preScore = progress.mythicCount * 10000;
+                                    }
+
+                                    //Calculate the score for redis bestTimestamp - 2Years * score
+                                    var score = parseInt(bestKillTimestamps['all'] / 1000, 10) - (3600 * 24 * 365 * 2 * preScore);
+
+                                    async.parallel([
+
+                                        function (callback) {
+                                            rankModel.upsert("tier_" + raid.tier + "#" + raid.name, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                logger.verbose("Update World Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                                callback(error);
+                                            });
+                                        },
+                                        function (callback) {
+                                            rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + guildProgress.region, guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                logger.verbose("Update Region Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                                callback(error);
+                                            });
+                                        },
+                                        function (callback) {
+                                            realmModel.findOne({
+                                                region: guildProgress.region,
+                                                name: guildProgress.realm
+                                            }, {
+                                                connected_realms: 1,
+                                                "bnet.locale": 1,
+                                                "bnet.timezone": 1
+                                            }, function (error, realm) {
+                                                if (realm && realm.connected_realms && realm.bnet && realm.bnet.locale && realm.bnet.timezone) {
+                                                    async.parallel([
+                                                        function (callback) {
+                                                            rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + guildProgress.region + "#" + realm.connected_realms.join('#'), guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                                logger.verbose("Update Realm Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                                                callback(error);
+                                                            });
+                                                        },
+                                                        function (callback) {
+                                                            var zoneArray = realm.bnet.timezone.split('/');
+                                                            if (zoneArray.length > 0) {
+                                                                rankModel.upsert("tier_" + raid.tier + "#" + raid.name + "#" + realm.bnet.locale + "#" + zoneArray[0], guildProgress.region, guildProgress.realm, guildProgress.name, score, function (error) {
+                                                                    logger.verbose("Update Locale Rank for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                                                    callback(error);
+                                                                });
+                                                            } else {
+                                                                callback(error)
+                                                            }
+                                                        }
+                                                    ], function (error) {
+                                                        callback(error)
+                                                    });
+                                                } else {
+                                                    logger.warn("Realm %s-%s not found", guildProgress.region, guildProgress.realm);
+                                                    callback(error);
+                                                }
+                                            });
+                                        }
+                                    ], function (error) {
+                                        callback(error);
+                                    });
+                                } else {
+                                    logger.verbose("No legit kill found for guild %s-%s-%s", guildProgress.region, guildProgress.realm, guildProgress.name);
+                                    callback();
+                                }
+                            }
+                        ], function (error) {
+                            callback(error);
+                        });
+
                     });
                 }, function (error) {
                     callback(error);
