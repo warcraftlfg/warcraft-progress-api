@@ -73,7 +73,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                         };
                                         if (currentKill.timestamp + 1000 == nextKill.timestamp && currentKill.source == nextKill.source) {
                                             if (difficulty == "mythic") {
-                                                if (currentKill.count + nextKill.count >= 16) {
+                                                if (currentKill.count + nextKill.count >= 8) {
                                                     if (currentKill.source == "news") {
                                                         mythicNewsProgressTimestamps.push([currentKill.timestamp, nextKill.timestamp]);
                                                     } else {
@@ -99,7 +99,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
 
                                     //One timestamp kill
                                     if (difficulty == "mythic") {
-                                        if (currentKill.count >= 16) {
+                                        if (currentKill.count >= 8) {
                                             if (currentKill.source == "news") {
                                                 mythicNewsProgressTimestamps.push([currentKill.timestamp]);
                                             } else {
