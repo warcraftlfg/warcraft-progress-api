@@ -45,9 +45,9 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                 });
             },
             function (guildProgress, callback) {
-                var bestKillTimestamps = {all: 0, normal: 0, heroic: 0, mythic: 0};
 
                 async.eachSeries(config.progress.raids, function (raid, callback) {
+                    var bestKillTimestamps = {all: 0, normal: 0, heroic: 0, mythic: 0};
 
                     var progress = {normalCount: 0, heroicCount: 0, mythicCount: 0};
 
