@@ -85,7 +85,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
                                                     }
                                                 }
                                             } else {
-                                                if (currentKill.count + nextKill.count >= 2) {
+                                                if (currentKill.count + nextKill.count >= 8) {
                                                     progress[difficulty][boss]["timestamps"].push([currentKill.timestamp, nextKill.timestamp]);
                                                 } else {
                                                     progress[difficulty][boss]["irrelevantTimestamps"].push([currentKill.timestamp, nextKill.timestamp]);
@@ -99,7 +99,7 @@ ProgressUpdateProcess.prototype.updateGuildProgress = function () {
 
                                     //One timestamp kill
                                     if (difficulty == "mythic") {
-                                        if (currentKill.count >= 8) {
+                                        if (currentKill.count >= 2) {
                                             if (currentKill.source == "news") {
                                                 mythicNewsProgressTimestamps.push([currentKill.timestamp]);
                                             } else {
