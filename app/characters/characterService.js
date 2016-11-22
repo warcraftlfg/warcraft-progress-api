@@ -49,6 +49,22 @@ module.exports.parseProgress = function (region, character, callback) {
                         return callback();
                     }
 
+                    //PATCH TO IMPROVE
+                    if (raid.name == "Trial of Valor" && difficulty=="mythic") {
+                        if (region == "eu" && character.guild.realm == "Howling Fjord" && character.guild.name == "Экзорсус") {
+                            if(boss[difficulty + 'Timestamp']==1479578325000)
+                                return callback();
+                        }
+                        if (region == "eu" && character.guild.realm == "Sargeras" && character.guild.name == "From Scratch") {
+                            if(boss[difficulty + 'Timestamp']==1479689679000)
+                                return callback();
+                        }
+                        if (region == "us" && character.guild.realm == "Illidan" && character.guild.name == "Limit") {
+                            if(boss[difficulty + 'Timestamp']==1479712084000)
+                                return callback();
+                        }
+                    }
+
                     async.series([
                         function (callback) {
                             //Check if the kill already exist
