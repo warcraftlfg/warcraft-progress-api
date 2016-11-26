@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Black Rook Hold",
+    "slug": "black-rook-hold",
+    "time": 2280000
+  },
+  {
+    "name": "Court of Stars",
+    "slug": "court-of-stars",
+    "time": 1800000
+  },
+  {
+    "name": "Darkheart Thicket",
+    "slug": "darkheart-thicket",
+    "time": 1800000
+  },
+  {
+    "name": "Eye of Azshara",
+    "slug": "eye-of-azshara",
+    "time": 2100000
+  },
+  {
+    "name": "Halls of Valor",
+    "slug": "halls-of-valor",
+    "time": 2700000
+  },
+  {
+    "name": "Maw of Souls",
+    "slug": "maw-of-souls",
+    "time": 1440000
+  },
+  {
+    "name": "Neltharion's Lair",
+    "slug": "neltharions-lair",
+    "time": 1980000
+  },
+  {
+    "name": "The Arcway",
+    "slug": "the-arcway",
+    "time": 2700000
+  },
+  {
+    "name": "Vault of the Wardens",
+    "slug": "vault-of-the-wardens",
+    "time": 1980000
+  }
+]

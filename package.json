@@ -6,6 +6,7 @@
   "dependencies": {
     "async": "*",
     "body-parser": "*",
+    "cheerio": "^0.22.0",
     "compression": "*",
     "express": "*",
     "lodash": "*",
@@ -13,7 +14,6 @@
     "redis": "*",
     "request": "*",
     "winston": "*",
-    "cheerio":"*",
     "winston-daily-rotate-file": "^1.0.1"
   },
   "scripts": {

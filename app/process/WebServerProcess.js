@@ -43,6 +43,7 @@ function WebServerProcess(port) {
     this.app.use('/api/v1', process.require("guildProgress/routes.js"));
     this.app.use('/api/v1', process.require("kills/routes.js"));
     this.app.use('/api/v1', process.require("stats/routes.js"));
+    this.app.use('/api/v1', process.require("mythicDungeons/routes.js"));
 
 
 
