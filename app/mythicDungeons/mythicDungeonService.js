@@ -156,17 +156,16 @@ module.exports.insertRuns = function (runs, affixes, dungeon, realm, callback) {
     async.forEachSeries(runs, function (run, callback) {
 
         run.dungeon = dungeon.name;
-        run.realm = realm.name;
         run.region = realm.region;
         run.affixes = affixes;
 
 
         mythicDungeonModel.findOne("legion", run, function (error, result) {
             if (result) {
-                logger.info("Run for dungeon %s level %s for %s-%s in %s ms already exist, skip it", run.dungeon, run.level, run.region, run.realm, run.time);
+                logger.info("Run for dungeon %s level %s for %s-%s in %s ms already exist, skip it", run.dungeon, run.level, run.region, run.time);
                 callback();
             } else {
-                logger.info("Insert run for dungeon %s level %s for %s-%s in %s ms", run.dungeon, run.level, run.region, run.realm, run.time);
+                logger.info("Insert run for dungeon %s level %s for %s-%s in %s ms", run.dungeon, run.level, run.region, run.time);
                 mythicDungeonModel.insertOne("legion", run, function (error) {
                     callback(error);
                 });
