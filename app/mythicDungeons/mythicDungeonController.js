@@ -20,11 +20,25 @@ module.exports.getRanking = function (req, res, next) {
     }
 
     if (req.query && req.query.dungeon) {
-
         criteria.dungeon = req.query.dungeon;
     }
+    var limit;
+    if (req.query && req.query.limit) {
+        parseInt(req.query.limit, 10);
 
-    mythicDungeonModel.find(req.params.extension, criteria, function (error, runs) {
+        if (limit < 0) {
+            limit = 50;
+        }
+
+        if (limit > 50) {
+            limit = 50;
+        }
+
+    } else {
+        limit = 50;
+    }
+
+    mythicDungeonModel.find(req.params.extension, criteria, limit, function (error, runs) {
 
 
         if (error) {

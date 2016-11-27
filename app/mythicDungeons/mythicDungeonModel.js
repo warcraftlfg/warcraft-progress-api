@@ -21,9 +21,9 @@ module.exports.findOne = function (extension, criteria, callback) {
  * @param criteria
  * @param callback
  */
-module.exports.find = function (extension, criteria, callback) {
+module.exports.find = function (extension, criteria, limit,callback) {
     var collection = applicationStorage.mongo.collection(extension + "_dungeons");
-    collection.find(criteria,{_id:0}).sort({level: -1, time: 1}).limit(100).toArray(function (error, runs) {
+    collection.find(criteria,{_id:0}).sort({level: -1, time: 1}).limit(limit).toArray(function (error, runs) {
         callback(error, runs);
     });
 };
