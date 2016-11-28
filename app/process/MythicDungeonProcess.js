@@ -65,8 +65,7 @@ MythicDungeonProcess.prototype.parseSite = function () {
             if (error && error !== true) {
                 logger.error(error.message);
             }
-            console.log("FINI");
-            //self.parseSite();
+            self.parseSite();
         }
     );
 };
