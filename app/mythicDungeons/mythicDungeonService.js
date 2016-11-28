@@ -128,8 +128,9 @@ module.exports.parsePage = function (body, realmsSlugArray, dungeon, realm, call
 
                     //FIND REALM
                     var slug = $(this).find("a").attr("href").split('/')[6];
-                    character.realm = realmsSlugArray[slug].name;
-                    connectedRealms.push(realmsSlugArray[slug].connected_realms);
+
+                    character.realm = realmsSlugArray[realm.region][slug].name;
+                    connectedRealms.push(realmsSlugArray[realm.region][slug].connected_realms);
 
                     //FIND NAME
                     character.name = $(this).text();

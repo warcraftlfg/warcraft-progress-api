@@ -40,11 +40,18 @@ MythicDungeonProcess.prototype.parseSite = function () {
             function (realms, callback) {
                 var realmsSlugArray = [];
                 realms.forEach(function (realm) {
-                    realmsSlugArray[realm.bnet.slug] = {name:realm.name,connected_realms:realm.connected_realms};
+                    if (realmsSlugArray[realm.region] == null) {
+                        realmsSlugArray[realm.region] = [];
+                    }
+                    realmsSlugArray[realm.region][realm.bnet.slug] = {
+                        name: realm.name,
+                        connected_realms: realm.connected_realms
+                    };
                 });
+
                 callback(null, realms, realmsSlugArray);
             },
-            function (realms, realmsSlugArray, realmsConnectedArray, callback) {
+            function (realms, realmsSlugArray, callback) {
                 async.forEachSeries(realms, function (realm, callback) {
                     async.forEachSeries(dungeons, function (dungeon, callback) {
                         mythicDungeonService.getRuns(realm, dungeon, realmsSlugArray, function (error) {
