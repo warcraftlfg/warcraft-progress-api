@@ -44,8 +44,14 @@ module.exports.getRanking = function (req, res, next) {
     var skip = 0;
     if (req.query && req.query.page) {
 
-        var page = parseInt(req.query.page,10);
+        var page = parseInt(req.query.page, 10);
         if (!isNaN(page)) {
+            if (page >= 1) {
+                page--;
+            }
+            if (page < 0) {
+                page = 0;
+            }
             skip = page * limit;
         }
 
@@ -99,7 +105,7 @@ module.exports.getRanking = function (req, res, next) {
                 }
             },
             function (callback) {
-                mythicDungeonModel.find(req.params.extension, criteria, limit, skip,function (error, runs) {
+                mythicDungeonModel.find(req.params.extension, criteria, limit, skip, function (error, runs) {
                     callback(error, runs);
                 });
             }
