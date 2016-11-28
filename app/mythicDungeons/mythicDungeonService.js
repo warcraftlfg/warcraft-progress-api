@@ -80,67 +80,66 @@ module.exports.parsePage = function (body, realmsSlugArray, dungeon, realm, call
             if (count == 3) {
                 run.faction = $(this).attr("data-value") == "alliance" ? 0 : 1;
                 run.roster = [];
-                var realms = [];
+                var realmsCount = 0;
                 $(this).find(".List-item.gutter-tiny").each(function () {
-                        var character = {};
+                    var character = {};
 
-                        //FIND CLASS
-                        var classe = $(this).find("a").attr("class");
-                        if (classe.indexOf("WARRIOR") != -1) {
-                            character.class = 1;
-                        } else if (classe.indexOf("PALADIN") != -1) {
-                            character.class = 2;
-                        } else if (classe.indexOf("DEMONHUNTER") != -1) {
-                            character.class = 12;
-                        } else if (classe.indexOf("HUNTER") != -1) {
-                            character.class = 3;
-                        } else if (classe.indexOf("ROGUE") != -1) {
-                            character.class = 4;
-                        } else if (classe.indexOf("PRIEST") != -1) {
-                            character.class = 5;
-                        } else if (classe.indexOf("DEATHKNIGHT") != -1) {
-                            character.class = 6;
-                        } else if (classe.indexOf("SHAMAN") != -1) {
-                            character.class = 7;
-                        } else if (classe.indexOf("MAGE") != -1) {
-                            character.class = 8;
-                        } else if (classe.indexOf("WARLOCK") != -1) {
-                            character.class = 9;
-                        } else if (classe.indexOf("MONK") != -1) {
-                            character.class = 10;
-                        } else if (classe.indexOf("DRUID") != -1) {
-                            character.class = 11;
-                        } else {
-                            logger.error("Character Class not found");
-                        }
-
-                        //FIND ROLE
-                        var role = $(this).find(".Character-role span").attr("class");
-                        if (role) {
-                            if (role.indexOf("tank") != -1) {
-                                character.role = "tank";
-                            } else if (role.indexOf("healer") != -1) {
-                                character.role = "healer";
-                            }
-                        } else {
-                            character.role = "dps";
-                        }
-
-                        //FIND REALM
-                        character.realm = realmsSlugArray[$(this).find("a").attr("href").split('/')[6]]
-
-
-                        if (realm.connected_realms.indexOf(character.realm) >= 0) {
-                            realms.push(character.realm);
-                        }
-
-                        //FIND NAME
-                        character.name = $(this).text();
-                        run.roster.push(character);
+                    //FIND CLASS
+                    var classe = $(this).find("a").attr("class");
+                    if (classe.indexOf("WARRIOR") != -1) {
+                        character.class = 1;
+                    } else if (classe.indexOf("PALADIN") != -1) {
+                        character.class = 2;
+                    } else if (classe.indexOf("DEMONHUNTER") != -1) {
+                        character.class = 12;
+                    } else if (classe.indexOf("HUNTER") != -1) {
+                        character.class = 3;
+                    } else if (classe.indexOf("ROGUE") != -1) {
+                        character.class = 4;
+                    } else if (classe.indexOf("PRIEST") != -1) {
+                        character.class = 5;
+                    } else if (classe.indexOf("DEATHKNIGHT") != -1) {
+                        character.class = 6;
+                    } else if (classe.indexOf("SHAMAN") != -1) {
+                        character.class = 7;
+                    } else if (classe.indexOf("MAGE") != -1) {
+                        character.class = 8;
+                    } else if (classe.indexOf("WARLOCK") != -1) {
+                        character.class = 9;
+                    } else if (classe.indexOf("MONK") != -1) {
+                        character.class = 10;
+                    } else if (classe.indexOf("DRUID") != -1) {
+                        character.class = 11;
+                    } else {
+                        logger.error("Character Class not found");
                     }
-                );
+
+                    //FIND ROLE
+                    var role = $(this).find(".Character-role span").attr("class");
+                    if (role) {
+                        if (role.indexOf("tank") != -1) {
+                            character.role = "tank";
+                        } else if (role.indexOf("healer") != -1) {
+                            character.role = "healer";
+                        }
+                    } else {
+                        character.role = "dps";
+                    }
+
+                    //FIND REALM
+                    character.realm = realmsSlugArray[$(this).find("a").attr("href").split('/')[6]]
+
+
+                    if (realm.connected_realms.indexOf(character.realm) >= 0) {
+                        realmsCount++;
+                    }
+
+                    //FIND NAME
+                    character.name = $(this).text();
+                    run.roster.push(character);
+                });
                 //Insert realm only when 4 characters are from the same realm
-                if (realms.length >= 4) {
+                if (realmsCount >= 4) {
                     run.realms = realm.connected_realms;
                 }
             }
