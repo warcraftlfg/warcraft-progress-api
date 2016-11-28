@@ -41,6 +41,15 @@ module.exports.getRanking = function (req, res, next) {
         limit = 50;
     }
 
+    var skip = 0;
+    if (req.query && req.query.page) {
+
+        var page = parseInt(req.query.page,10);
+        if (!isNaN(page)) {
+            skip = page * limit;
+        }
+
+    }
 
     async.waterfall([
             function (callback) {
@@ -56,7 +65,6 @@ module.exports.getRanking = function (req, res, next) {
                                 realms.forEach(function (realm) {
                                     criteria['$or'].push({realms: realm.name});
                                 });
-                                criteria['realms'] = {$exists:true};
                                 callback();
                             } else {
                                 callback();
@@ -80,7 +88,6 @@ module.exports.getRanking = function (req, res, next) {
                             realm.connected_realms.forEach(function (realmName) {
                                 criteria['$or'].push({realms: realmName});
                             });
-                            criteria['realms'] = {$exists:true};
                             callback();
 
                         } else {
@@ -92,7 +99,7 @@ module.exports.getRanking = function (req, res, next) {
                 }
             },
             function (callback) {
-                mythicDungeonModel.find(req.params.extension, criteria, limit, function (error, runs) {
+                mythicDungeonModel.find(req.params.extension, criteria, limit, skip,function (error, runs) {
                     callback(error, runs);
                 });
             }
