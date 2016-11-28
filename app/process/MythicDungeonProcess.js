@@ -40,7 +40,7 @@ MythicDungeonProcess.prototype.parseSite = function () {
             function (realms, callback) {
                 var realmsSlugArray = [];
                 realms.forEach(function (realm) {
-                    realmsSlugArray[realm.bnet.slug] = realm.connected_realms;
+                    realmsSlugArray[realm.bnet.slug] = {name:realm.name,connected_realms:realm.connected_realms};
                 });
                 callback(null, realms, realmsSlugArray);
             },

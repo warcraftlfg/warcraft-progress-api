@@ -127,9 +127,9 @@ module.exports.parsePage = function (body, realmsSlugArray, dungeon, realm, call
                     }
 
                     //FIND REALM
-                    character.realm = realmsSlugArray[$(this).find("a").attr("href").split('/')[6]]
-
-                    connectedRealms.push(character.realm);
+                    var slug = $(this).find("a").attr("href").split('/')[6];
+                    character.realm = realmsSlugArray[slug].name;
+                    connectedRealms.push(realmsSlugArray[slug].connected_realms);
 
                     //FIND NAME
                     character.name = $(this).text();
@@ -161,7 +161,7 @@ module.exports.parsePage = function (body, realmsSlugArray, dungeon, realm, call
         if (run.time < dungeon.time) {
             runs.push(run);
         } else {
-            // logger.verbose("Run not valid " + run.time + ">" + dungeon.time);
+            logger.verbose("Run not valid " + run.time + ">" + dungeon.time);
         }
     });
 
@@ -181,10 +181,10 @@ module.exports.insertRuns = function (runs, affixes, dungeon, realm, callback) {
         var obj = {dungeon: run.dungeon, level: run.level, region: run.region, time: run.time, date: run.date};
         mythicDungeonModel.findOne("legion", obj, function (error, result) {
             if (result) {
-                //logger.info("Run for dungeon %s level:%s region:%s time:%s date:%s already exist, skip it", run.dungeon, run.level, run.region, run.time, run.date);
+                logger.info("Run for dungeon %s level:%s region:%s time:%s date:%s already exist, skip it", run.dungeon, run.level, run.region, run.time, run.date);
                 callback();
             } else {
-                // logger.info("Insert run for dungeon %s level:%s region:%s time:%s date:%s", run.dungeon, run.level, run.region, realm.name, run.time, run.date);
+                logger.info("Insert run for dungeon %s level:%s region:%s time:%s date:%s", run.dungeon, run.level, run.region, realm.name, run.time, run.date);
                 mythicDungeonModel.insertOne("legion", run, function (error) {
                     callback(error);
                 });
