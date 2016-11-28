@@ -29,7 +29,7 @@ MythicDungeonProcess.prototype.parseSite = function () {
                 //GET ALL REALMS (except CN & TW)
                 realmModel.find({$or: [{region: "eu"}, {region: "us"}]}, {
                     "bnet.slug": 1,
-                    name:1,
+                    name: 1,
                     connected_realms: 1,
                     region: 1,
                     _id: 0
@@ -40,11 +40,11 @@ MythicDungeonProcess.prototype.parseSite = function () {
             function (realms, callback) {
                 var realmsSlugArray = [];
                 realms.forEach(function (realm) {
-                    realmsSlugArray[realm.bnet.slug] = realm.name;
+                    realmsSlugArray[realm.bnet.slug] = realm.connected_realms;
                 });
-                callback(null,realms,realmsSlugArray);
+                callback(null, realms, realmsSlugArray);
             },
-            function (realms, realmsSlugArray, callback) {
+            function (realms, realmsSlugArray, realmsConnectedArray, callback) {
                 async.forEachSeries(realms, function (realm, callback) {
                     async.forEachSeries(dungeons, function (dungeon, callback) {
                         mythicDungeonService.getRuns(realm, dungeon, realmsSlugArray, function (error) {
