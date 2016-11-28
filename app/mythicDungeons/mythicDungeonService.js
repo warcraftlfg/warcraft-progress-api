@@ -139,15 +139,16 @@ module.exports.parsePage = function (body, realmsSlugArray, dungeon, realm, call
                         run.roster.push(character);
                     }
                 );
+                //Insert realm only when 4 characters are from the same realm
+                if (realms.length >= 4) {
+                    run.realms = realm.connected_realms;
+                }
             }
             if (count == 4) {
                 run.date = Date.parse($(this).attr("data-value"));
             }
 
-            //Insert realm only when 4 characters are from the same realm
-            if (realms.length >= 4) {
-                run.realms = realms;
-            }
+
 
             count++;
         });
@@ -174,10 +175,10 @@ module.exports.insertRuns = function (runs, affixes, dungeon, realm, callback) {
 
         mythicDungeonModel.findOne("legion", run, function (error, result) {
             if (result) {
-                logger.info("Run for dungeon %s level %s for %s-%s in %s ms already exist, skip it", run.dungeon, run.level, run.region, run.time);
+                logger.info("Run for dungeon %s level %s for %s-%s in %s ms already exist, skip it", run.dungeon, run.level, run.region, realm.name, run.time);
                 callback();
             } else {
-                logger.info("Insert run for dungeon %s level %s for %s-%s in %s ms", run.dungeon, run.level, run.region, run.time);
+                logger.info("Insert run for dungeon %s level %s for %s-%s in %s ms", run.dungeon, run.level, run.region, realm.name, run.time);
                 mythicDungeonModel.insertOne("legion", run, function (error) {
                     callback(error);
                 });
