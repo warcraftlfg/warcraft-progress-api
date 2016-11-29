@@ -83,6 +83,7 @@ module.exports.getRanking = function (req, res, next) {
             },
             function (callback) {
                 if (req.query && req.query.region && req.query.realm) {
+                    criteria.region = req.query.region;
                     realmModel.findOne({
                         region: req.query.region,
                         name: req.query.realm
