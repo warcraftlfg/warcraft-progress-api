@@ -62,7 +62,7 @@ module.exports.getRanking = function (req, res, next) {
                         realmModel.find({
                             "bnet.locale": localeArray[0],
                             "bnet.timezone": {$regex: "^" + localeArray[1], $options: "i"}
-                        }, {name: 1}, function (error, realms) {
+                        }, {name: 1,region:1}, function (error, realms) {
                             if (realms.length > 0) {
                                 criteria["$or"] = [];
                                 realms.forEach(function (realm) {
