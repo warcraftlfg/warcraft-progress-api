@@ -13,9 +13,6 @@ module.exports.getRanking = function (req, res, next) {
 
     var criteria = {};
 
-    if (req.query && req.query.region) {
-        criteria.region = req.query.region;
-    }
 
     if (req.query && req.query.affixes) {
         criteria.affixes = req.query.affixes.split('#');
@@ -59,8 +56,8 @@ module.exports.getRanking = function (req, res, next) {
 
     async.waterfall([
             function (callback) {
-                if (req.query && req.query.region && req.query.locale) {
-                    var localeArray = req.query.locale.split('#');
+                if (req.query && req.query.region) {
+                    var localeArray = req.query.region.split('#');
                     if (localeArray.length == 2) {
                         realmModel.find({
                             "bnet.locale": localeArray[0],
@@ -77,7 +74,7 @@ module.exports.getRanking = function (req, res, next) {
                             }
                         });
                     } else {
-                        callback();
+                        criteria.region = req.query.region;
                     }
                 } else {
                     callback();
