@@ -88,11 +88,9 @@ module.exports.getRanking = function (req, res, next) {
                         name: req.query.realm
                     }, {connected_realms: 1,region:1}, function (error, realm) {
                         if (realm) {
-                            criteria.region = realm.region;
-
                             criteria["$or"] = [];
                             realm.connected_realms.forEach(function (realmName) {
-                                criteria['$or'].push({realms: realmName});
+                                criteria['$or'].push({region:realm.region,realms: realmName});
                             });
                             callback();
 
