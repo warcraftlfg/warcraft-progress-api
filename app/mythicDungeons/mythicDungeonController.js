@@ -66,7 +66,7 @@ module.exports.getRanking = function (req, res, next) {
                             if (realms.length > 0) {
                                 criteria["$or"] = [];
                                 realms.forEach(function (realm) {
-                                    criteria['$or'].push({realms: realm.name});
+                                    criteria['$or'].push({region:realm.region,realms: realm.name});
                                 });
                                 callback();
                             } else {
