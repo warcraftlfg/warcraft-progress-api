@@ -75,6 +75,7 @@ module.exports.getRanking = function (req, res, next) {
                         });
                     } else {
                         criteria.region = req.query.region;
+                        callback();
                     }
                 } else {
                     callback();
