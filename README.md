@@ -42,8 +42,8 @@ boss_name: The boss name
 timestamp: timestampArray.join('+')  
 
  *Exemple*  
-https://api.warcraftprogress.com/api/v1/kills/19/Trial%20of%20Valor/eu/Tarren%20Mill/Method/mythic/Guarm/1479929888000
- https://api.warcraftprogress.com/api/v1/kills/19/The%20Emerald%20Nightmare/eu/Tarren%20Mill/Method/heroic/Il'gynoth,%20Heart%20of%20Corruption/1475055525000+1475055526000
+https://api.warcraftprogress.com/api/v1/kills/19/Trial%20of%20Valor/eu/Tarren%20Mill/Method/mythic/Guarm/1479929888000  
+https://api.warcraftprogress.com/api/v1/kills/19/The%20Emerald%20Nightmare/eu/Tarren%20Mill/Method/heroic/Il'gynoth,%20Heart%20of%20Corruption/1475055525000+1475055526000
 
 ## Guild Rank
 /api/v1/rank/:tier/:raid_name/:guild_region/:guild_realm/:guild_name
