@@ -26,7 +26,7 @@ You get an object with all the raid kills.
 		}
     }
 
-*Exemple*
+*Exemple*  
 https://api.warcraftprogress.com/api/v1/progress/19/The%20Emerald%20Nightmare/eu/Tarren%20Mill/Method
 
 **Kill Roster**  
@@ -41,7 +41,7 @@ difficulty: normal, heroic or mythic
 boss_name: The boss name  
 timestamp: timestampArray.join('+')  
 
- *Exemple*
+ *Exemple*  
 https://api.warcraftprogress.com/api/v1/kills/19/Trial%20of%20Valor/eu/Tarren%20Mill/Method/mythic/Guarm/1479929888000
  https://api.warcraftprogress.com/api/v1/kills/19/The%20Emerald%20Nightmare/eu/Tarren%20Mill/Method/heroic/Il'gynoth,%20Heart%20of%20Corruption/1475055525000+1475055526000
 
@@ -53,3 +53,6 @@ raid_name: The Nighthold, Trial of Valor or The Emerald Nightmare
 guild_region: us / eu / tw
 guild_realm: Realm in local en_GB
 guild_name: The guild name
+
+ *Exemple*  
+https://api.warcraftprogress.com/api/v1/ranks/19/The%20Emerald%20Nightmare/eu/Tarren%20Mill/Method
