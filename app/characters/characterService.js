@@ -49,38 +49,31 @@ module.exports.parseProgress = function (region, character, callback) {
                         return callback();
                     }
                     
+                    Helya
+                    //EXPLOIT REMOVE BAN ON Helya
+                    if (raid.name == "Trial of Valor" && difficulty=="mythic") {
+                        if (region == "eu" && character.guild.realm == "Howling Fjord" && character.guild.name == "Экзорсус") {
+                            if(boss[difficulty + 'Timestamp']==1479578325000)
+                                return callback();
+                        }
+                        if (region == "eu" && character.guild.realm == "Sargeras" && character.guild.name == "From Scratch") {
+                            if(boss[difficulty + 'Timestamp']==1479689679000)
+                                return callback();
+                        }
+                        if (region == "us" && character.guild.realm == "Illidan" && character.guild.name == "Limit") {
+                            if(boss[difficulty + 'Timestamp']==1479712084000)
+                                return callback();
+                        }
+                    }
                     
-                    //EXPLOIT REMOVE KILL 
-                    if (raid.name == "Trial of Valor" && difficulty=="mythic") {
-                        if (region == "eu" && character.guild.realm == "Howling Fjord" && character.guild.name == "Экзорсус") {
-                            if(boss[difficulty + 'Timestamp']==1479578325000)
-                                return callback();
-                        }
-                        if (region == "eu" && character.guild.realm == "Sargeras" && character.guild.name == "From Scratch") {
-                            if(boss[difficulty + 'Timestamp']==1479689679000)
-                                return callback();
-                        }
-                        if (region == "us" && character.guild.realm == "Illidan" && character.guild.name == "Limit") {
-                            if(boss[difficulty + 'Timestamp']==1479712084000)
+                    //EXPLOIT FUSION GUILD BAN on Star Augur
+                    if (raid.name == "The Nighthold" && difficulty=="mythic") {
+                        if (region == "eu" && character.guild.realm == "Soulflayer" && character.guild.name == "Фьюжн") {
+                            if(boss[difficulty + 'Timestamp']==1485713672000)
                                 return callback();
                         }
                     }
-
-                    //PATCH TO IMPROVE
-                    if (raid.name == "Trial of Valor" && difficulty=="mythic") {
-                        if (region == "eu" && character.guild.realm == "Howling Fjord" && character.guild.name == "Экзорсус") {
-                            if(boss[difficulty + 'Timestamp']==1479578325000)
-                                return callback();
-                        }
-                        if (region == "eu" && character.guild.realm == "Sargeras" && character.guild.name == "From Scratch") {
-                            if(boss[difficulty + 'Timestamp']==1479689679000)
-                                return callback();
-                        }
-                        if (region == "us" && character.guild.realm == "Illidan" && character.guild.name == "Limit") {
-                            if(boss[difficulty + 'Timestamp']==1479712084000)
-                                return callback();
-                        }
-                    }
+                    
 
                     async.series([
                         function (callback) {
