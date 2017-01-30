@@ -14,6 +14,16 @@ module.exports.getRank = function (req, res, next) {
     logger.info("%s %s %s %s", req.headers['x-forwarded-for'] || req.connection.remoteAddress, req.method, req.path, JSON.stringify(req.params));
 
     async.parallel({
+        faction: function (callback) {
+            guildModel.getGuildInfo(req.params.region, req.params.realm, req.params.name, function (error, guild) {
+                if (guild && guild.bnet && guild.bnet.side != null) {
+                    callback(error, guild.bnet.side)
+                }else {
+                    callback(error);
+                }
+
+            });
+        },
         world: function (callback) {
             rankModel.getRank("tier_" + req.params.tier + "#" + req.params.raid, req.params.region, req.params.realm, req.params.name, function (error, rank) {
                 if (rank != null) {
@@ -84,6 +94,9 @@ module.exports.getRank = function (req, res, next) {
             logger.error(error.message);
             res.status(500).send(error.message);
         } else if (result && result.world !== null && result.region != null) {
+            if (result.faction ==null){
+                delete result.faction;
+            }
             if (result.realmlocale != null) {
                 result.realm = result.realmlocale.realm;
                 result.locale = result.realmlocale.locale;
@@ -126,7 +139,7 @@ module.exports.getRanking = function (req, res, next) {
 
     async.waterfall([
         function (callback) {
-            var key = "tier_"+req.params.tier+"#"+req.params.raid;
+            var key = "tier_" + req.params.tier + "#" + req.params.raid;
             if (req.params.realm && req.params.region) {
                 realmModel.findOne({
                     region: req.params.region,
@@ -137,8 +150,8 @@ module.exports.getRanking = function (req, res, next) {
                         callback(error, key);
                     } else {
 
-                        res.status(404).send("Realm "+req.params.region+"-"+req.params.realm+" not found");
-                        logger.error("Realm "+req.params.region+"-"+req.params.realm+" not found");
+                        res.status(404).send("Realm " + req.params.region + "-" + req.params.realm + " not found");
+                        logger.error("Realm " + req.params.region + "-" + req.params.realm + " not found");
                         return;
                         callback(new Error("Realm %s-%s not found", req.params.region, req.params.realm));
                     }
