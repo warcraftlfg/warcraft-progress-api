@@ -49,7 +49,7 @@ module.exports.parseProgress = function (region, character, callback) {
                         return callback();
                     }
                     
-                    Helya
+                    
                     //EXPLOIT REMOVE BAN ON Helya
                     if (raid.name == "Trial of Valor" && difficulty=="mythic") {
                         if (region == "eu" && character.guild.realm == "Howling Fjord" && character.guild.name == "Экзорсус") {
