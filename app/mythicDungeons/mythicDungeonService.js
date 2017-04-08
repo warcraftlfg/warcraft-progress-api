@@ -180,13 +180,13 @@ module.exports.insertRuns = function (runs, affixes, dungeon, realm, callback) {
 
 
         var obj = {dungeon: run.dungeon, level: run.level, region: run.region, time: run.time, date: run.date};
-        mythicDungeonModel.findOne("legion", obj, function (error, result) {
+        mythicDungeonModel.findOne("legion72", obj, function (error, result) {
             if (result) {
                 logger.verbose("Run for dungeon %s level:%s region:%s time:%s date:%s already exist, skip it", run.dungeon, run.level, run.region, run.time, run.date);
                 callback();
             } else {
                 logger.info("Insert run for dungeon %s level:%s region:%s time:%s date:%s", run.dungeon, run.level, run.region, realm.name, run.time, run.date);
-                mythicDungeonModel.insertOne("legion", run, function (error) {
+                mythicDungeonModel.insertOne("legion72", run, function (error) {
                     callback(error);
                 });
 
