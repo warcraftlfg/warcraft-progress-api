@@ -43,5 +43,20 @@
     "name": "Vault of the Wardens",
     "slug": "vault-of-the-wardens",
     "time": 1980000
+  },
+  {
+    "name": "Return to Karazhan: Lower",
+    "slug": "return-to-karazhan-lower",
+    "time": 2280000
+  },
+  {
+    "name": "Return to Karazhan: Upper",
+    "slug": "return-to-karazhan-upper",
+    "time": 2280000
+  },
+  {
+    "name": "Cathedral of Eternal Night",
+    "slug": "cathedral-of-eternal-night",
+    "time": 1980000
   }
 ]
