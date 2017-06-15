@@ -127,10 +127,18 @@ module.exports.parsePage = function (body, realmsSlugArray, dungeon, realm, call
                     }
 
                     //FIND REALM
-                    var slug = $(this).find("a").attr("href").split('/')[6];
-
-                    character.realm = realmsSlugArray[realm.region][slug].name;
-                    connectedRealms.push(realmsSlugArray[realm.region][slug].connected_realms);
+                    var splitUrl = $(this).find("a").attr("href").split('/');
+                    var slug;
+                    if (splitUrl[0] == '') {
+                        slug = $(this).find("a").attr("href").split('/')[3];
+                    } else {
+                        slug = slug = $(this).find("a").attr("href").split('/')[6];
+                    }
+                    //console.log(slug);
+                    if (realmsSlugArray[realm.region][slug]) {
+                        character.realm = realmsSlugArray[realm.region][slug].name;
+                        connectedRealms.push(realmsSlugArray[realm.region][slug].connected_realms);
+                    }
 
                     //FIND NAME
                     character.name = $(this).text();
